@@ -1,5 +1,7 @@
 # BRLIA®
 
+<img width="1536" height="1024" alt="fluxograma" src="https://github.com/user-attachments/assets/2dee5d6a-6486-42e5-a845-f216b116148a" />
+
 ## Bureau de Crédito Inteligente para Liquidação Instantânea B2B
 
 ### Visão Geral
