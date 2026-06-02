@@ -1,5 +1,3 @@
-3 MILHÕES P K > MARGEM DE VENDA (50MILHÕES ~ 200MILHÕES)
-
 ------------------------------------------------
 
 Em vez de:
@@ -154,5 +152,3 @@ Sempre que uma transação for negada, o log deve capturar o output do método _
 Para documentação detalhada sobre resiliência em sistemas financeiros, consulte o guia da Resilience4j e os padrões de Cloud Events para Kafka.
 
 ---
-
-3 MILHÕES P K > MARGEM DE VENDA (50MILHÕES ~ 200MILHÕES) > divisão de ipo (banco e bc)
