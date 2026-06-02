@@ -421,4 +421,5 @@ localhost:50051
 # Licença
 
 notrusthetrump
+
 Copyright © 2026 by k .´.
