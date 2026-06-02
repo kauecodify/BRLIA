@@ -1,0 +1,161 @@
+# docker-compose.yml para ambiente seguro
+# Usar Node.js LTS
+# FROM node:20-alpine
+
+# # Diretório da aplicação
+# WORKDIR /app
+
+# # Copiar package.json e instalar dependências
+# COPY package*.json ./
+# RUN npm install --production
+
+# # Copiar todo o código
+# COPY . .
+
+# # Expor a porta da API
+# EXPOSE 3000
+
+# # Rodar a aplicação
+# CMD ["node", "index.js"]
+
+version: '3.9'
+
+services:
+  # ----------------------------
+  # Banco de dados MySQL
+  # ----------------------------
+  db:
+    image: mysql:8.1
+    container_name: brlia_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: brlia_prod
+      MYSQL_USER: brlia_app
+      MYSQL_PASSWORD_FILE: /run/secrets/db_app_password
+    secrets:
+      - db_root_password
+      - db_app_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backups:/backups
+    ports:
+      - "3306:3306"
+    networks:
+      - brlia-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  # ----------------------------
+  # Node.js API
+  # ----------------------------
+  api:
+    build: ./api
+    container_name: brlia_api
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: brlia_app
+      DB_PASSWORD_FILE: /run/secrets/db_app_password
+      DB_NAME: brlia_prod
+      NODE_ENV: production
+    secrets:
+      - db_app_password
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - brlia-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      retries: 3
+
+  # ----------------------------
+  # ML Engine (gRPC)
+  # ----------------------------
+  ml-engine:
+    build: ./ml-engine
+    container_name: brlia_ml_engine
+    ports:
+      - "50051:50051"
+    environment:
+      - MODEL_VERSION=v3.2
+      - REDIS_URL=redis://redis-ai:6379
+    depends_on:
+      - redis-ai
+    networks:
+      - brlia-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; channel = grpc.insecure_channel('localhost:50051')"]
+      interval: 20s
+      retries: 3
+
+  # ----------------------------
+  # Redis AI
+  # ----------------------------
+  redis-ai:
+    image: redis/redis-stack:latest
+    container_name: brlia_redis_ai
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis_data:/data
+    networks:
+      - brlia-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+
+  # ----------------------------
+  # Flink JobManager
+  # ----------------------------
+  flink-jobmanager:
+    image: apache/flink:1.17
+    container_name: brlia_flink_jobmanager
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - FLINK_PROPERTIES=jobmanager.rpc.address:flink-jobmanager
+    networks:
+      - brlia-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 20s
+      retries: 3
+
+# ----------------------------
+# Volumes
+# ----------------------------
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ----------------------------
+# Secrets
+# ----------------------------
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
+
+# ----------------------------
+# Rede interna
+# ----------------------------
+networks:
+  brlia-net:
+    driver: bridge
+    internal: true

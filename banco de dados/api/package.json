@@ -1,0 +1,16 @@
+{
+  "name": "brlia-api",
+  "version": "1.0.0",
+  "description": "API para receber formulários BRLIA",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}
