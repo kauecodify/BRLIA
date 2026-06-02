@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRLIA® - Inteligência de Risco e Bureau de Crédito</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000;
+            --glass: rgba(255, 255, 255, .05);
+            --border: rgba(255, 255, 255, .08);
+            --text: #fff;
+            --muted: #b8b8b8;
+            --accent: #8b5cf6;
+            --accent-soft: rgba(139, 92, 246, .25);
+            --radius: 24px;
+            --transition: .4s cubic-bezier(0.16, 1, 0.3, 1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background Elements */
+        canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+        }
+
+        #glow {
+            position: fixed;
+            inset: -20%;
+            background: radial-gradient(circle at center, var(--accent-soft), transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+            transition: transform .15s ease-out;
+        }
+
+        /* Layout & Structure */
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 120px 32px;
+        }
+
+        section {
+            margin-bottom: 160px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 5%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        /* Typography & Hero */
+        .eyebrow {
+            font-size: 13px;
+            letter-spacing: .35em;
+            color: var(--accent);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: clamp(42px, 6vw, 76px);
+            line-height: 1.05;
+            margin-bottom: 32px;
+            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, .7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(32px, 4vw, 42px);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        p {
+            color: var(--muted);
+            font-size: 18px;
+            max-width: 720px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .hero {
+            text-align: center;
+            padding-top: 140px;
+            padding-bottom: 80px;
+        }
+
+        /* Tags */
+        .tags {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .tag {
+            background: var(--glass);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Buttons (CTA) */
+        .btn-cta,
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 48px;
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: .2em;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .btn-cta:hover,
+        .cta:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 0 16px var(--accent-soft);
+        }
+
+        .btn-cta.secondary {
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .btn-cta.secondary:hover {
+            background: var(--muted);
+            color: #000;
+            box-shadow: 0 0 0 16px rgba(184, 184, 184, .2);
+        }
+
+        /* Pulse Animation */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 var(--accent-soft);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px transparent;
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 transparent;
+            }
+        }
+
+        /* Grid & Cards */
+        .features,
+        .stats,
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 64px;
+        }
+
+        .feature-card,
+        .card,
+        .demo-container {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px;
+            backdrop-filter: blur(14px);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover,
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--accent-soft);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            color: var(--text);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Process Flow */
+        .process-flow {
+            text-align: center;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 64px;
+        }
+
+        .step {
+            width: 260px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .arrow {
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            background: transparent;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--glass);
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .risk-selector {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .risk-option {
+            flex: 1;
+            padding: 0.8rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .risk-option.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .result-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            min-height: 300px;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .report-content {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+
+        .report-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .rating-a {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .rating-b {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .rating-c {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--glass);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 80px 32px;
+            border-top: 1px solid var(--border);
+            color: rgba(255, 255, 255, .4);
+            background: transparent;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .flow-steps {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .btn-cta,
+            .cta {
+                padding: 14px 32px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <canvas id="particle-canvas"></canvas>
+    <div id="glow"></div>
+
+    <header>
+        <div class="logo">BRLIA<span>®</span></div>
+        <nav>
+            <ul>
+                <li><a href="#features">Recursos</a></li>
+                <li><a href="#process">Processo</a></li>
+                <li><a href="#demo">Demo Trial</a></li>
+                <li><a href="#contact">Contato</a></li>
+            </ul>
+        </nav>
+        <button class="btn-cta" onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">Testar
+            Demo</button>
+    </header>
+
+    <section class="hero">
+        <span class="eyebrow">BRLIA® Official</span>
+        <h1>Processamento Inteligente de<br>Análise de Risco em Crédito</h1>
+        <p>Plataforma de Bureau de Crédito impulsionada por IA. Automatize carteiras, gere ratings em tempo real e
+            transforme dados brutos em decisões estratégicas.</p>
+
+        <div class="tags">
+            <span class="tag">Inteligência Artificial</span>
+            <span class="tag">Big Data</span>
+            <span class="tag">Rating Automático</span>
+            <span class="tag">Infraestrutura Adaptativa</span>
+            <span class="tag">Power BI Integration</span>
+        </div>
+
+    <!-- <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-cta pulse"
+                onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">Iniciar Análise
+                Gratuita</button>
+            <button class="btn-cta secondary">Ver Documentação</button>
+        </div>
+    </section> -->
+
+    <section id="features" class="features">
+        <div class="feature-card">
+            <!-- <div class="feature-icon">📊</div> -->
+            <h3 class="feature-title">Bureau de Crédito & IA</h3>
+            <p class="feature-desc">Análise profunda de risco de carteiras de crédito utilizando algoritmos de machine
+                learning para prever inadimplência e otimizar concessão.</p>
+        </div>
+        <div class="feature-card">
+            <!-- <div class="feature-icon">⚡</div> -->
+            <h3 class="feature-title">Rating em Tempo Real</h3>
+            <p class="feature-desc">Carregue arquivos XLSX, CSV ou Excel e obtenha classificação de risco automática
+                instantaneamente. O analista apenas formaliza o relatório.</p>
+        </div>
+        <div class="feature-card">
+            <!-- <div class="feature-icon">🔄</div> -->
+            <h3 class="feature-title">Automação de Carteiras</h3>
+            <p class="feature-desc">Crie, automatize e gerencie carteiras de crédito com segmentação adaptativa de
+                clientes baseada em comportamento e histórico.</p>
+        </div>
+        <div class="feature-card">
+            <!-- <div class="feature-icon">🏗️</div> -->
+            <h3 class="feature-title">Infraestrutura Adaptativa</h3>
+            <p class="feature-desc">Desenvolvimento sob medida para o cliente. Processamento multiescalonado que vai do
+                Data Mining à criação de Data Marts estratégicos.</p>
+        </div>
+        <div class="feature-card">
+            <!-- <div class="feature-icon">📈</div> -->
+            <h3 class="feature-title">Dashboards Power BI</h3>
+            <p class="feature-desc">Geração automática de dashboards interativos em Power BI, prontos para apresentação
+                executiva e tomada de decisão.</p>
+        </div>
+        <div class="feature-card">
+            <!-- <div class="feature-icon">🛡️</div> -->
+            <h3 class="feature-title">Segurança & Compliance</h3>
+            <p class="feature-desc">Processamento regulatório, auditoria contínua e proteção de dados sensíveis em
+                conformidade com LGPD e normas bancárias.</p>
+        </div>
+    </section>
+
+    <section id="process" class="process-flow">
+        <span class="eyebrow">Fluxo Inteligente</span>
+        <h2>Processamento Multiescalonado</h2>
+        <p style="color: var(--muted); margin: 0 auto 2rem;">Do dado bruto à inteligência estratégica</p>
+
+        <div class="flow-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Data Mining</h3>
+                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Extração e limpeza de dados
+                    brutos de múltiplas fontes (Excel, CSV, APIs).</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Planejamento Estratégico</h3>
+                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Aplicação de modelos de IA e
+                    definição de regras de negócio e risco.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Data Marts</h3>
+                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Geração de bases estruturadas
+                    para dashboards e relatórios finais.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+        <div class="demo-container">
+            <div class="demo-header">
+                <span class="eyebrow">Versão Trial</span>
+                <h2 style="margin-bottom: 0.5rem;">Demo: Análise de Risco</h2>
+                <p style="color: var(--muted); margin: 0 auto;">Carregue sua base de dados e veja a IA em ação.</p>
+            </div>
+
+            <div class="demo-grid">
+                <div class="input-panel">
+                    <div class="form-group">
+                        <label>1. Selecione o Arquivo (XLSX, CSV, Excel)</label>
+                        <div class="upload-area" id="drop-zone">
+                            <div class="upload-icon">📁</div>
+                            <p id="file-name" style="color: var(--muted); margin: 0;">Arraste seu arquivo aqui ou clique
+                                para selecionar</p>
+                            <input type="file" id="file-input" accept=".xlsx,.csv,.xls" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>2. Defina o Perfil de Risco Alvo</label>
+                        <div class="risk-selector">
+                            <div class="risk-option active" data-risk="low">Low Risk</div>
+                            <div class="risk-option" data-risk="medium">Medium Risk</div>
+                            <div class="risk-option" data-risk="high">High Risk</div>
+                        </div>
+                    </div>
+
+                    <button class="btn-cta" style="width: 100%; padding: 1rem;" id="analyze-btn">
+                        Gerar Rating Automático
+                    </button>
+
+                    <p
+                        style="font-size: 0.75rem; color: var(--muted); margin-top: 1rem; text-align: center; opacity: 0.7;">
+                        *Processamento simulado localmente. Em produção, ocorre em infraestrutura adaptativa BRLIA®.
+                    </p>
+                </div>
+
+                <div class="result-area">
+                    <div class="loading-overlay" id="loading">
+                        <div class="spinner"></div>
+                        <p style="margin-bottom: 0.5rem;">Processando Dados...</p>
+                        <p style="font-size: 0.8rem; color: var(--muted);" id="loading-status">Conectando ao Motor de
+                            IA...</p>
+                    </div>
+
+                    <div class="report-content" id="report-result">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h3 style="margin-bottom: 0.5rem;">Relatório de Rating Gerado</h3>
+                                <p style="font-size: 0.9rem; color: var(--muted); margin: 0;">ID da Análise: <span
+                                        id="analysis-id" style="color: var(--accent);">#BRL-8829</span></p>
+                            </div>
+                            <div class="rating-badge rating-a" id="rating-badge">AAA</div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                            <h4 style="margin-bottom: 1rem; color: var(--text);">Resumo Executivo</h4>
+                            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.5;">
+                                A carteira analisada apresenta <span id="risk-text"
+                                    style="color: var(--success); font-weight: 600;">baixa probabilidade</span> de
+                                inadimplência nos próximos 12 meses. Recomenda-se aprovação automática para 85% dos
+                                registros.
+                            </p>
+
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="score-value" style="color: var(--success);">92%</div>
+                                    <div class="stat-label">Score Médio</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">1,240</div>
+                                    <div class="stat-label">Registros Analisados</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">0.4s</div>
+                                    <div class="stat-label">Tempo de Processamento</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: var(--accent);">Power BI</div>
+                                    <div class="stat-label">Dashboard Pronto</div>
+                                </div>
+                            </div>
+
+                            <button class="btn-cta secondary" style="width: 100%; margin-top: 1.5rem;">
+                                📥 Baixar Relatório Formatado (PDF)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="empty-state"
+                        style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted);">
+                        <p style="margin: 0;">Aguardando dados para análise...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="footer-links">
+            <a href="#">Sobre a BRLIA</a>
+            <a href="#">API Documentation</a>
+            <a href="#">Compliance</a>
+            <a href="#">Suporte</a>
+        </div>
+        <p>&copy; 2026 BRLIA® — Bureau Financeiro & Liquidação em Tempo Real. Todos os direitos reservados.</p>
+        <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.5;">Infraestrutura Adaptativa | Processamento
+            Multiescalonado | IA Generativa Financeira</p>
+    </footer>
+
+    <script>
+        // === UI Elements ===
+        const glow = document.getElementById('glow');
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // === Glow Effect ===
+        document.addEventListener('mousemove', (e) => {
+            glow.style.transform = `translate(${(e.clientX - window.innerWidth / 2) * 0.05}px, ${(e.clientY - window.innerHeight / 2) * 0.05}px)`;
+        });
+
+        // === Canvas Particles ===
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
+                this.size = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(139, 92, 246, 0.3)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // === Demo Logic ===
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const riskOptions = document.querySelectorAll('.risk-option');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const loadingOverlay = document.getElementById('loading');
+        const loadingStatus = document.getElementById('loading-status');
+        const reportResult = document.getElementById('report-result');
+        const emptyState = document.getElementById('empty-state');
+        const ratingBadge = document.getElementById('rating-badge');
+        const riskText = document.getElementById('risk-text');
+        const scoreValue = document.getElementById('score-value');
+
+        let selectedRisk = 'low';
+        let selectedFile = null;
+
+        // Risk Selection
+        riskOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                riskOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                selectedRisk = option.dataset.risk;
+            });
+        });
+
+        // File Upload
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                fileNameDisplay.textContent = `✓ ${selectedFile.name}`;
+                fileNameDisplay.style.color = 'var(--accent)';
+            }
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
+        dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--border)'; });
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault(); dropZone.style.borderColor = 'var(--border)';
+            if (e.dataTransfer.files.length) {
+                selectedFile = e.dataTransfer.files[0];
+                fileNameDisplay.textContent = `✓ ${selectedFile.name}`;
+                fileNameDisplay.style.color = 'var(--accent)';
+            }
+        });
+
+        // Analysis Simulation
+        analyzeBtn.addEventListener('click', () => {
+            if (!selectedFile) {
+                alert('Por favor, selecione um arquivo (XLSX, CSV ou Excel) primeiro.');
+                return;
+            }
+            emptyState.style.display = 'none';
+            reportResult.classList.remove('visible');
+            loadingOverlay.classList.add('visible');
+
+            const steps = ["Lendo estrutura...", "Aplicando Data Mining...", "IA Processando...", "Gerando Rating...", "Formatando Relatório..."];
+            let stepIndex = 0;
+            const interval = setInterval(() => {
+                if (stepIndex < steps.length) { loadingStatus.textContent = steps[stepIndex]; stepIndex++; }
+            }, 600);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                loadingOverlay.classList.remove('visible');
+                showResults();
+            }, 3500);
+        });
+
+        function showResults() {
+            let ratingText = 'AAA', riskDesc = 'baixa probabilidade', scoreColor = 'var(--success)', scoreVal = '92%', ratingClass = 'rating-a';
+
+            if (selectedRisk === 'medium') {
+                ratingText = 'BBB'; riskDesc = 'probabilidade moderada'; scoreVal = '78%'; scoreColor = 'var(--warning)'; ratingClass = 'rating-b';
+            } else if (selectedRisk === 'high') {
+                ratingText = 'CCC'; riskDesc = 'alta probabilidade'; scoreVal = '45%'; scoreColor = 'var(--danger)'; ratingClass = 'rating-c';
+            }
+
+            ratingBadge.textContent = ratingText;
+            ratingBadge.className = `rating-badge ${ratingClass}`;
+            riskText.textContent = riskDesc;
+            riskText.style.color = scoreColor;
+            scoreValue.textContent = scoreVal;
+            scoreValue.style.color = scoreColor;
+            document.getElementById('analysis-id').textContent = '#BRL-' + Math.floor(Math.random() * 9000 + 1000);
+
+            setTimeout(() => reportResult.classList.add('visible'), 50);
+        }
+
+        // === CTA Redirect ===
+        document.querySelectorAll('.btn-cta').forEach(btn => {
+            btn.onclick = e => { e.preventDefault(); window.location.href = 'demo.html'; };
+        });
+
+        // === Smooth Scroll for Anchor Links ===
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+
+</html>

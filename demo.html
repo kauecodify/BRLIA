@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRLIA® - Neural Processing Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(139, 92, 246, 0.4);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: #000;
+            padding: 1rem 2.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .column-mapping {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .mapping-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .mapping-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .mapping-item select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .neural-network {
+            display: none;
+            position: relative;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 24px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .neuron-layer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .neuron {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            border: 2px solid rgba(139, 92, 246, 0.6);
+            transition: all 0.3s;
+        }
+
+        .neuron.active {
+            animation: neuronPulse 0.5s ease-out;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+        }
+
+        @keyframes neuronPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .layer-1 {
+            left: 5%;
+        }
+
+        .layer-2 {
+            left: 25%;
+        }
+
+        .layer-3 {
+            left: 45%;
+        }
+
+        .layer-4 {
+            left: 65%;
+        }
+
+        .layer-5 {
+            left: 85%;
+        }
+
+        .processing-dashboard {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #8b5cf6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .data-table-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .calculation-highlight {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .export-section {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-export.csv {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .status-log {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry.success {
+            color: #10b981;
+        }
+
+        .log-entry.info {
+            color: #8b5cf6;
+        }
+
+        .log-entry.warning {
+            color: #f59e0b;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .mapping-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .neural-network {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">BRLIA® Neural Engine</div>
+            <div class="subtitle">Processamento Neural de Dados Financeiros com Machine Learning</div>
+        </div>
+
+        <button onclick="window.location.href='index.html'" style="
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:16px 48px;
+    border-radius:999px;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    text-decoration:none;
+    letter-spacing:.15em;
+    font-size:13px;
+    font-weight:600;
+    transition:var(--transition);
+    background:rgba(255,255,255,.03);
+    backdrop-filter:blur(12px);
+
+    background:var(--accent);
+    color:#000;
+    transform:translateY(-2px);
+    box-shadow:
+        0 0 25px rgba(139,92,246,.45),
+        0 0 0 12px rgba(139,92,246,.15);
+            align-items: center;
+            justify-content: center;
+            padding: 16px 48px;
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: .2em;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+            cursor: pointer;
+            background: transparent;
+            display
+    ">
+            ← Voltar para Início
+        </button>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <img src="dashboard.gif" width="300px" padding="300px" alt="Dashboard">
+            <h2>Carregue sua Planilha</h2>
+            <p style="color: #94a3b8; margin: 1rem 0;">Suporte para XLSX, XLS e CSV</p>
+            <input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv">
+            <label class="btn-upload" for="fileInput">Selecionar Arquivo</label>
+        </div>
+
+        <!-- Column Mapping -->
+        <div class="column-mapping" id="columnMapping">
+            <h2 style="margin-bottom: 1rem;">🎯 Mapeamento de Colunas</h2>
+            <p style="color: #94a3b8;">Selecione as colunas correspondentes para processamento neural</p>
+
+            <div class="mapping-grid">
+                <div class="mapping-item">
+                    <label>💰 Valor da Transação</label>
+                    <select id="colValor">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="mapping-item">
+                    <label>📅 Data</label>
+                    <select id="colData">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="mapping-item">
+                    <label> Categoria/Merchant</label>
+                    <select id="colCategoria">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="mapping-item">
+                    <label>👤 Cliente ID</label>
+                    <select id="colCliente">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="mapping-item">
+                    <label>📊 Score Atual</label>
+                    <select id="colScore">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="mapping-item">
+                    <label>🎯 Risco (Target)</label>
+                    <select id="colRisco">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-upload" onclick="startNeuralProcessing()" style="width: 100%; margin-top: 2rem;">
+                Iniciar Processamento Neural
+            </button>
+        </div>
+
+        <!-- Neural Network Visualization -->
+        <div class="neural-network" id="neuralNetwork">
+            <div class="neuron-layer layer-1" id="layer1"></div>
+            <div class="neuron-layer layer-2" id="layer2"></div>
+            <div class="neuron-layer layer-3" id="layer3"></div>
+            <div class="neuron-layer layer-4" id="layer4"></div>
+            <div class="neuron-layer layer-5" id="layer5"></div>
+        </div>
+
+        <!-- Processing Dashboard -->
+        <div class="processing-dashboard" id="processingDashboard">
+            <div class="metric-card">
+                <div class="metric-label">Registros Processados</div>
+                <div class="metric-value" id="metricRegistros">0</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressRegistros"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Precisão do Modelo</div>
+                <div class="metric-value" id="metricPrecisao">0%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressPrecisao"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Tempo de Processamento</div>
+                <div class="metric-value" id="metricTempo">0s</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Risk Score Médio</div>
+                <div class="metric-value" id="metricRiskScore">0</div>
+            </div>
+        </div>
+
+        <!-- Status Log -->
+        <div class="status-log" id="statusLog" style="display: none;">
+            <div class="log-entry info">Sistema pronto para processamento...</div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table-container" id="dataTableContainer">
+            <h2 style="margin-bottom: 1.5rem;">📋 Resultados do Processamento Neural</h2>
+            <div style="overflow-x: auto;">
+                <table id="resultsTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section" id="exportSection">
+            <h2 style="margin-bottom: 1rem;">✅ Processamento Concluído</h2>
+            <p style="color: #94a3b8; margin-bottom: 2rem;">Exporte os resultados processados</p>
+            <button class="btn-export" onclick="exportToXLSX()">
+                📥 Salvar como XLSX
+            </button>
+            <button class="btn-export csv" onclick="exportToCSV()">
+                📥 Salvar como CSV
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let workbook = null;
+        let worksheet = null;
+        let jsonData = [];
+        let processedData = [];
+        let columns = [];
+
+        // File Upload Handler
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                workbook = XLSX.read(data, { type: 'array' });
+
+                worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                if (jsonData.length > 0) {
+                    columns = Object.keys(jsonData[0]);
+                    populateColumnSelectors();
+                    document.getElementById('columnMapping').style.display = 'block';
+                    addLog('Arquivo carregado com sucesso!', 'success');
+                    addLog(`${jsonData.length} registros encontrados`, 'info');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function populateColumnSelectors() {
+            const selectors = ['colValor', 'colData', 'colCategoria', 'colCliente', 'colScore', 'colRisco'];
+
+            selectors.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                select.innerHTML = '<option value="">Selecione...</option>';
+
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function initializeNeuralNetwork() {
+            const layers = [
+                { id: 'layer1', neurons: 6 },
+                { id: 'layer2', neurons: 8 },
+                { id: 'layer3', neurons: 10 },
+                { id: 'layer4', neurons: 8 },
+                { id: 'layer5', neurons: 6 }
+            ];
+
+            layers.forEach(layer => {
+                const layerEl = document.getElementById(layer.id);
+                layerEl.innerHTML = '';
+
+                for (let i = 0; i < layer.neurons; i++) {
+                    const neuron = document.createElement('div');
+                    neuron.className = 'neuron';
+                    neuron.textContent = `N${i + 1}`;
+                    layerEl.appendChild(neuron);
+                }
+            });
+        }
+
+        async function startNeuralProcessing() {
+            const mapping = {
+                valor: document.getElementById('colValor').value,
+                data: document.getElementById('colData').value,
+                categoria: document.getElementById('colCategoria').value,
+                cliente: document.getElementById('colCliente').value,
+                score: document.getElementById('colScore').value,
+                risco: document.getElementById('colRisco').value
+            };
+
+            if (!mapping.valor || !mapping.data) {
+                alert('Por favor, mapeie pelo menos Valor e Data');
+                return;
+            }
+
+            document.getElementById('neuralNetwork').style.display = 'block';
+            document.getElementById('processingDashboard').style.display = 'grid';
+            document.getElementById('statusLog').style.display = 'block';
+
+            initializeNeuralNetwork();
+
+            addLog('Iniciando processamento neural...', 'info');
+            await simulateNeuralProcessing(mapping);
+        }
+
+        async function simulateNeuralProcessing(mapping) {
+            const totalRecords = jsonData.length;
+            let processed = 0;
+            const startTime = Date.now();
+
+            // Animate neurons
+            for (let layer = 1; layer <= 5; layer++) {
+                const layerEl = document.getElementById(`layer${layer}`);
+                const neurons = layerEl.querySelectorAll('.neuron');
+
+                for (let neuron of neurons) {
+                    await sleep(50);
+                    neuron.classList.add('active');
+                    setTimeout(() => neuron.classList.remove('active'), 500);
+                }
+            }
+
+            // Process data with ML simulation
+            processedData = jsonData.map((row, index) => {
+                processed++;
+
+                // Update metrics in real-time
+                if (index % 10 === 0) {
+                    document.getElementById('metricRegistros').textContent = processed;
+                    document.getElementById('progressRegistros').style.width =
+                        `${(processed / totalRecords) * 100}%`;
+
+                    addLog(`Processando registro ${processed}/${totalRecords}...`, 'info');
+                }
+
+                // Simulate ML calculations
+                const valor = parseFloat(row[mapping.valor]) || 0;
+                const scoreAtual = parseFloat(row[mapping.score]) || 600;
+
+                // Neural network risk calculation simulation
+                const riskFactors = {
+                    valorFactor: Math.min(valor / 10000, 1),
+                    scoreFactor: (1000 - scoreAtual) / 1000,
+                    categoryRisk: Math.random() * 0.3,
+                    temporalRisk: Math.random() * 0.2
+                };
+
+                const neuralOutput = (
+                    (riskFactors.valorFactor * 0.3) +
+                    (riskFactors.scoreFactor * 0.4) +
+                    (riskFactors.categoryRisk * 0.2) +
+                    (riskFactors.temporalRisk * 0.1)
+                );
+
+                const newRiskScore = Math.round(neuralOutput * 1000);
+                const riskLevel = newRiskScore < 300 ? 'LOW' : newRiskScore < 600 ? 'MEDIUM' : 'HIGH';
+
+                // Calculate accuracy simulation
+                const accuracy = 85 + Math.random() * 10;
+
+                return {
+                    ...row,
+                    Neural_Risk_Score: newRiskScore,
+                    Risk_Level: riskLevel,
+                    ML_Confidence: `${accuracy.toFixed(2)}%`,
+                    Processing_Time: `${(Math.random() * 100).toFixed(2)}ms`,
+                    Feature_Importance: `${(Math.random() * 100).toFixed(1)}%`
+                };
+            });
+
+            // Final metrics
+            const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            const avgRiskScore = Math.round(processedData.reduce((acc, row) => acc + row.Neural_Risk_Score, 0) / processedData.length);
+            const finalAccuracy = (85 + Math.random() * 10).toFixed(2);
+
+            document.getElementById('metricRegistros').textContent = totalRecords;
+            document.getElementById('progressRegistros').style.width = '100%';
+            document.getElementById('metricPrecisao').textContent = `${finalAccuracy}%`;
+            document.getElementById('progressPrecisao').style.width = `${finalAccuracy}%`;
+            document.getElementById('metricTempo').textContent = `${totalTime}s`;
+            document.getElementById('metricRiskScore').textContent = avgRiskScore;
+
+            addLog(`Processamento concluído em ${totalTime}s`, 'success');
+            addLog(`Precisão do modelo: ${finalAccuracy}%`, 'success');
+            addLog(`Risk Score médio: ${avgRiskScore}`, 'info');
+
+            // Show results table
+            displayResults();
+
+            document.getElementById('dataTableContainer').style.display = 'block';
+            document.getElementById('exportSection').style.display = 'block';
+        }
+
+        function displayResults() {
+            const table = document.getElementById('resultsTable');
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+
+            // Headers
+            const headers = Object.keys(processedData[0]);
+            thead.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            // Rows (limit to first 50 for performance)
+            const displayData = processedData.slice(0, 50);
+            tbody.innerHTML = displayData.map(row => {
+                return '<tr>' + headers.map(h => {
+                    const value = row[h];
+                    if (h.includes('Risk_Score') || h.includes('Confidence')) {
+                        return `<td><span class="calculation-highlight">${value}</span></td>`;
+                    }
+                    return `<td>${value}</td>`;
+                }).join('') + '</tr>';
+            }).join('');
+        }
+
+        function exportToXLSX() {
+            const ws = XLSX.utils.json_to_sheet(processedData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "BRLIA_Processed");
+
+            XLSX.writeFile(wb, `BRLIA_Neural_Processing_${new Date().toISOString().split('T')[0]}.xlsx`);
+            addLog('Arquivo XLSX exportado com sucesso!', 'success');
+        }
+
+        function exportToCSV() {
+            const csv = XLSX.utils.json_to_sheet(processedData, { header: Object.keys(processedData[0]) });
+            const csvContent = XLSX.utils.sheet_to_csv(csv);
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `BRLIA_Neural_Processing_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            addLog('Arquivo CSV exportado com sucesso!', 'success');
+        }
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('statusLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+
+</html>
