@@ -1,942 +1,654 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRLIA® - Inteligência de Risco e Bureau de Crédito</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #000;
-            --glass: rgba(255, 255, 255, .05);
-            --border: rgba(255, 255, 255, .08);
-            --text: #fff;
-            --muted: #b8b8b8;
-            --accent: #8b5cf6;
-            --accent-soft: rgba(139, 92, 246, .25);
-            --radius: 24px;
-            --transition: .4s cubic-bezier(0.16, 1, 0.3, 1);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Background Elements */
-        canvas {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-        }
-
-        #glow {
-            position: fixed;
-            inset: -20%;
-            background: radial-gradient(circle at center, var(--accent-soft), transparent 60%);
-            z-index: -1;
-            pointer-events: none;
-            transition: transform .15s ease-out;
-        }
-
-        /* Layout & Structure */
-        main {
-            max-width: 1100px;
-            margin: auto;
-            padding: 120px 32px;
-        }
-
-        section {
-            margin-bottom: 160px;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1rem 5%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: var(--accent);
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
-        nav a {
-            color: var(--muted);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        nav a:hover {
-            color: var(--accent);
-        }
-
-        /* Typography & Hero */
-        .eyebrow {
-            font-size: 13px;
-            letter-spacing: .35em;
-            color: var(--accent);
-            margin-bottom: 24px;
-            text-transform: uppercase;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        h1 {
-            font-size: clamp(42px, 6vw, 76px);
-            line-height: 1.05;
-            margin-bottom: 32px;
-            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, .7) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        h2 {
-            font-size: clamp(32px, 4vw, 42px);
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        p {
-            color: var(--muted);
-            font-size: 18px;
-            max-width: 720px;
-            margin-bottom: 32px;
-            line-height: 1.6;
-        }
-
-        .hero {
-            text-align: center;
-            padding-top: 140px;
-            padding-bottom: 80px;
-        }
-
-        /* Tags */
-        .tags {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
-        }
-
-        .tag {
-            background: var(--glass);
-            color: var(--accent);
-            padding: 0.4rem 1rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(8px);
-        }
-
-        /* Buttons (CTA) */
-        .btn-cta,
-        .cta {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px 48px;
-            border-radius: 999px;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            text-decoration: none;
-            letter-spacing: .2em;
-            font-size: 13px;
-            font-weight: 600;
-            transition: var(--transition);
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .btn-cta:hover,
-        .cta:hover {
-            background: var(--accent);
-            color: #000;
-            box-shadow: 0 0 0 16px var(--accent-soft);
-        }
-
-        .btn-cta.secondary {
-            border-color: var(--border);
-            color: var(--muted);
-        }
-
-        .btn-cta.secondary:hover {
-            background: var(--muted);
-            color: #000;
-            box-shadow: 0 0 0 16px rgba(184, 184, 184, .2);
-        }
-
-        /* Pulse Animation */
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 var(--accent-soft);
-            }
-
-            70% {
-                box-shadow: 0 0 0 12px transparent;
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 transparent;
-            }
-        }
-
-        /* Grid & Cards */
-        .features,
-        .stats,
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 32px;
-            margin-top: 64px;
-        }
-
-        .feature-card,
-        .card,
-        .demo-container {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 36px;
-            backdrop-filter: blur(14px);
-            transition: var(--transition);
-        }
-
-        .feature-card:hover,
-        .card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent);
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--accent-soft);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent);
-            font-size: 1.6rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-title {
-            color: var(--text);
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        .feature-desc {
-            color: var(--muted);
-            font-size: 0.95rem;
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        /* Process Flow */
-        .process-flow {
-            text-align: center;
-        }
-
-        .flow-steps {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-top: 64px;
-        }
-
-        .step {
-            width: 260px;
-            position: relative;
-        }
-
-        .step-number {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .arrow {
-            color: var(--muted);
-            font-size: 1.5rem;
-        }
-
-        /* Demo Section */
-        .demo-section {
-            background: transparent;
-        }
-
-        .demo-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .demo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .demo-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 2.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--glass);
-        }
-
-        .upload-area:hover {
-            border-color: var(--accent);
-            background: var(--accent-soft);
-        }
-
-        .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--accent);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        .risk-selector {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 0.75rem;
-        }
-
-        .risk-option {
-            flex: 1;
-            padding: 0.8rem;
-            text-align: center;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
-
-        .risk-option.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-soft);
-        }
-
-        .result-area {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 1.5rem;
-            min-height: 300px;
-            position: relative;
-            border: 1px solid var(--border);
-        }
-
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 16px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .loading-overlay.visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .report-content {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s ease;
-        }
-
-        .report-content.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .rating-badge {
-            display: inline-block;
-            padding: 0.5rem 1.2rem;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            background: var(--accent-soft);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        .rating-a {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border-color: var(--success);
-        }
-
-        .rating-b {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning);
-            border-color: var(--warning);
-        }
-
-        .rating-c {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--danger);
-            border-color: var(--danger);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .stat-card {
-            background: var(--glass);
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin-top: 4px;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 80px 32px;
-            border-top: 1px solid var(--border);
-            color: rgba(255, 255, 255, .4);
-            background: transparent;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--muted);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--accent);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .flow-steps {
-                flex-direction: column;
-            }
-
-            .arrow {
-                transform: rotate(90deg);
-            }
-
-            nav ul {
-                display: none;
-            }
-
-            .btn-cta,
-            .cta {
-                padding: 14px 32px;
-                font-size: 12px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRLIA® — Intelligent Credit & Financial Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000; --glass:rgba(255,255,255,.05); --border:rgba(255,255,255,.08);
+  --text:#fff; --muted:#b8b8b8; --accent:#8b5cf6; --accent-soft:rgba(139,92,246,.25);
+  --radius:24px; --transition:.4s cubic-bezier(0.16,1,0.3,1);
+  --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+canvas#particle-canvas{position:fixed;inset:0;z-index:-2}
+#glow{position:fixed;inset:-20%;background:radial-gradient(circle at center,var(--accent-soft),transparent 60%);z-index:-1;pointer-events:none;transition:transform .15s ease-out}
+main{max-width:1120px;margin:auto;padding:120px 32px}
+section{margin-bottom:140px}
+header{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 5%;background:rgba(0,0,0,.6);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.5rem;font-weight:700;letter-spacing:-.5px}
+.logo span{color:var(--accent)}
+nav ul{display:flex;list-style:none;gap:1.8rem}
+nav a{color:var(--muted);text-decoration:none;font-weight:500;font-size:.92rem;transition:var(--transition)}
+nav a:hover{color:var(--accent)}
+.eyebrow{font-size:13px;letter-spacing:.35em;color:var(--accent);margin-bottom:24px;text-transform:uppercase;font-weight:600;display:inline-block}
+h1{font-size:clamp(40px,6vw,72px);line-height:1.05;margin-bottom:28px;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.7) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:clamp(30px,4vw,42px);margin-bottom:20px;text-align:center}
+h3{font-size:20px;margin-bottom:12px}
+h4{font-size:1rem;color:var(--text)}
+p{color:var(--muted);font-size:17px;max-width:760px;line-height:1.6;margin-bottom:28px}
+.center{text-align:center;margin-left:auto;margin-right:auto}
+.hero{text-align:center;padding-top:120px;padding-bottom:40px}
+.tags{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap;margin:2rem 0}
+.tag{background:var(--glass);color:var(--accent);padding:.4rem 1rem;border-radius:999px;font-size:.78rem;border:1px solid var(--border);backdrop-filter:blur(8px)}
+.btn-cta{display:inline-flex;align-items:center;justify-content:center;padding:16px 42px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:.18em;font-size:12px;font-weight:600;transition:var(--transition);cursor:pointer;background:transparent;text-transform:uppercase}
+.btn-cta:hover{background:var(--accent);color:#000;box-shadow:0 0 0 16px var(--accent-soft)}
+.btn-cta.secondary{border-color:var(--border);color:var(--muted)}
+.btn-cta.secondary:hover{background:var(--muted);color:#000;box-shadow:0 0 0 16px rgba(184,184,184,.2)}
+.btn-cta.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent-soft)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+/* Cards grid */
+.features,.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;margin-top:56px}
+.feature-card,.card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:32px;backdrop-filter:blur(14px);transition:var(--transition)}
+.feature-card:hover,.card:hover{transform:translateY(-6px);border-color:var(--accent)}
+.feature-title{color:var(--text);font-size:1.15rem;margin-bottom:.7rem;font-weight:600}
+.feature-desc{color:var(--muted);font-size:.94rem;margin:0;line-height:1.55}
+/* Layer tabs */
+.layer-tabs{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin:2.5rem 0 2rem}
+.layer-tab{padding:.8rem 1.6rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:600;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:var(--transition);font-family:inherit}
+.layer-tab:hover{border-color:var(--accent);color:var(--accent)}
+.layer-tab.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.layer-panel{display:none;animation:fadeIn .5s ease}
+.layer-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.layer-intro{text-align:center;max-width:720px;margin:0 auto 2rem}
+.layer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.layer-block{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:28px}
+.layer-block h4{margin-bottom:.6rem;color:var(--accent);font-size:.95rem;letter-spacing:.05em;text-transform:uppercase}
+.layer-block ul{list-style:none;color:var(--muted);font-size:.92rem;line-height:1.7}
+.layer-block li::before{content:"→ ";color:var(--accent)}
+/* Mock dashboard */
+.mock-dash{background:linear-gradient(180deg,rgba(139,92,246,.06),transparent);border:1px solid var(--border);border-radius:24px;padding:32px;margin-top:2rem}
+.mock-badge{display:inline-block;font-size:.7rem;letter-spacing:.15em;color:var(--warning);border:1px solid var(--warning);padding:.3rem .8rem;border-radius:999px;margin-bottom:1.2rem;text-transform:uppercase;font-weight:600}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:1.5rem}
+.kpi{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px}
+.kpi-label{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem}
+.kpi-value{font-size:1.5rem;font-weight:700}
+.kpi-value.purple{color:var(--accent)}
+.kpi-value.green{color:var(--success)}
+.kpi-value.yellow{color:var(--warning)}
+.bar{height:8px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;margin-top:.5rem}
+.bar-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .8s ease}
+/* Flow diagram */
+.flow{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:2rem 0}
+.flow-node{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:.7rem 1.1rem;font-size:.82rem;color:var(--text);font-weight:500}
+.flow-arrow{color:var(--accent);align-self:center;font-size:1.1rem}
+.states{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1.5rem}
+.state{font-size:.72rem;padding:.35rem .8rem;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-family:monospace;letter-spacing:.05em}
+.state.ok{border-color:var(--success);color:var(--success)}
+.state.warn{border-color:var(--warning);color:var(--warning)}
+.state.bad{border-color:var(--danger);color:var(--danger)}
+/* Revenue simulator */
+.sim{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:36px;margin-top:2rem}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:768px){.sim-grid{grid-template-columns:1fr}}
+.sim-field{margin-bottom:1.1rem}
+.sim-field label{display:block;font-size:.78rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.sim-field input{width:100%;padding:.7rem .9rem;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:.95rem;transition:var(--transition)}
+.sim-field input:focus{outline:none;border-color:var(--accent)}
+.sim-output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:16px;padding:24px}
+.sim-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
+.sim-row:last-child{border-bottom:none}
+.sim-row span:first-child{color:var(--muted)}
+.sim-row span:last-child{font-weight:600;font-family:monospace}
+.sim-row.total span:last-child{color:var(--accent);font-size:1.1rem}
+.sim-note{font-size:.72rem;color:var(--muted);margin-top:1.2rem;text-align:center;opacity:.8}
+/* Process */
+.process-flow{text-align:center}
+.flow-steps{display:flex;justify-content:center;align-items:center;gap:1.5rem;flex-wrap:wrap;margin-top:56px}
+.step{width:240px;position:relative;background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:28px 20px 20px}
+.step-number{position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:var(--accent);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#000}
+.step h3{font-size:1.05rem;margin-top:.5rem;margin-bottom:.5rem}
+.step p{font-size:.85rem;margin:0 auto;text-align:center}
+.arrow{color:var(--accent);font-size:1.4rem}
+/* Demo */
+.demo-container{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:40px;backdrop-filter:blur(14px)}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+@media(max-width:768px){.demo-grid{grid-template-columns:1fr}}
+.upload-area{border:2px dashed var(--border);border-radius:16px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:var(--transition);background:rgba(0,0,0,.2)}
+.upload-area:hover{border-color:var(--accent);background:var(--accent-soft)}
+.upload-icon{font-size:2rem;margin-bottom:.8rem;color:var(--accent)}
+.form-group{margin-bottom:1.5rem}
+.form-group label{display:block;margin-bottom:.5rem;color:var(--muted);font-size:.85rem}
+.risk-selector{display:flex;gap:.6rem;margin-top:.6rem}
+.risk-option{flex:1;padding:.7rem;text-align:center;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:var(--transition);color:var(--muted);font-size:.8rem}
+.risk-option.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.result-area{background:rgba(0,0,0,.3);border-radius:16px;padding:1.5rem;min-height:340px;position:relative;border:1px solid var(--border)}
+.loading-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:flex;flex-direction:column;justify-content:center;align-items:center;border-radius:16px;opacity:0;pointer-events:none;transition:opacity .3s}
+.loading-overlay.visible{opacity:1;pointer-events:all}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.report-content{opacity:0;transform:translateY(10px);transition:all .5s ease}
+.report-content.visible{opacity:1;transform:translateY(0)}
+.rating-badge{display:inline-block;padding:.5rem 1.2rem;border-radius:12px;font-weight:700;font-size:1.1rem;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent)}
+.rating-a{background:rgba(16,185,129,.15);color:var(--success);border-color:var(--success)}
+.rating-b{background:rgba(245,158,11,.15);color:var(--warning);border-color:var(--warning)}
+.rating-c{background:rgba(239,68,68,.15);color:var(--danger);border-color:var(--danger)}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1.5rem}
+.stat-card{background:var(--glass);padding:1rem;border-radius:12px;border:1px solid var(--border)}
+.stat-value{font-size:1.4rem;font-weight:700;color:var(--text)}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:4px}
+/* Footer */
+footer{text-align:center;padding:80px 32px 60px;border-top:1px solid var(--border);color:rgba(255,255,255,.4)}
+.footer-links{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;flex-wrap:wrap}
+.footer-links a{color:var(--muted);text-decoration:none;transition:var(--transition);font-size:.9rem}
+.footer-links a:hover{color:var(--accent)}
+@media(max-width:768px){
+  h1{font-size:2.4rem}
+  .flow-steps{flex-direction:column}
+  .arrow{transform:rotate(90deg)}
+  nav ul{display:none}
+  .btn-cta{padding:14px 28px;font-size:11px}
+  main{padding:100px 20px}
+  section{margin-bottom:100px}
+}
+</style>
 </head>
-
 <body>
-    <!-- Background Elements -->
-    <canvas id="particle-canvas"></canvas>
-    <div id="glow"></div>
+<canvas id="particle-canvas"></canvas>
+<div id="glow"></div>
 
-    <header>
-        <div class="logo">BRLIA<span>®</span></div>
-        <nav>
-            <ul>
-                <li><a href="#features">Recursos</a></li>
-                <li><a href="#process">Processo</a></li>
-                <li><a href="#demo">Demo Trial</a></li>
-                <li><a href="#contact">Contato</a></li>
-            </ul>
-        </nav>
-        <button class="btn-cta" onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">Testar
-            Demo</button>
-    </header>
+<header>
+  <div class="logo">BRLIA<span>®</span></div>
+  <nav>
+    <ul>
+      <li><a href="#arquitetura">Arquitetura</a></li>
+      <li><a href="#bureau">Bureau & IA</a></li>
+      <li><a href="#plataforma">Plataforma</a></li>
+      <li><a href="#infraestrutura">Infraestrutura</a></li>
+      <li><a href="#modelo">Modelo</a></li>
+      <li><a href="#demo">Demo</a></li>
+    </ul>
+  </nav>
+  <button class="btn-cta" onclick="document.getElementById('plataforma').scrollIntoView({behavior:'smooth'})">Acessar Plataforma</button>
+</header>
 
-    <section class="hero">
-        <span class="eyebrow">BRLIA® Official</span>
-        <h1>Processamento Inteligente de<br>Análise de Risco em Crédito</h1>
-        <p>Plataforma de Bureau de Crédito impulsionada por IA. Automatize carteiras, gere ratings em tempo real e
-            transforme dados brutos em decisões estratégicas.</p>
+<main>
 
-        <div class="tags">
-            <span class="tag">Inteligência Artificial</span>
-            <span class="tag">Big Data</span>
-            <span class="tag">Rating Automático</span>
-            <span class="tag">Infraestrutura Adaptativa</span>
-            <span class="tag">Power BI Integration</span>
-        </div>
+  <!-- HERO -->
+  <section class="hero">
+    <span class="eyebrow">BRLIA® Official</span>
+    <h1>Intelligent Credit &<br>Financial Infrastructure</h1>
+    <p class="center">Um ecossistema em três camadas integradas: website institucional, plataforma operacional e infraestrutura financeira. Dados viram inteligência. Inteligência vira decisão. Decisão vira operação conectada.</p>
+    <div class="tags">
+      <span class="tag">Inteligência Artificial</span>
+      <span class="tag">Bureau de Crédito</span>
+      <span class="tag">Recebíveis</span>
+      <span class="tag">Liquidação</span>
+      <span class="tag">Escrow</span>
+      <span class="tag">Ledger</span>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn-cta pulse" onclick="document.getElementById('arquitetura').scrollIntoView({behavior:'smooth'})">Explorar Arquitetura</button>
+      <button class="btn-cta secondary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Testar Demo</button>
+    </div>
+  </section>
 
-    <!-- <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <button class="btn-cta pulse"
-                onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">Iniciar Análise
-                Gratuita</button>
-            <button class="btn-cta secondary">Ver Documentação</button>
-        </div>
-    </section> -->
+  <!-- ARQUITETURA — 3 CAMADAS -->
+  <section id="arquitetura">
+    <span class="eyebrow">Ecossistema Integrado</span>
+    <h2 class="center">Três camadas. Uma infraestrutura.</h2>
+    <p class="center">Cada camada tem interface, módulos e controles próprios. As três compartilham identidade, autenticação e integração por APIs — sem misturar responsabilidades.</p>
 
-    <section id="features" class="features">
-        <div class="feature-card">
-            <!-- <div class="feature-icon">📊</div> -->
-            <h3 class="feature-title">Bureau de Crédito & IA</h3>
-            <p class="feature-desc">Análise profunda de risco de carteiras de crédito utilizando algoritmos de machine
-                learning para prever inadimplência e otimizar concessão.</p>
-        </div>
-        <div class="feature-card">
-            <!-- <div class="feature-icon">⚡</div> -->
-            <h3 class="feature-title">Rating em Tempo Real</h3>
-            <p class="feature-desc">Carregue arquivos XLSX, CSV ou Excel e obtenha classificação de risco automática
-                instantaneamente. O analista apenas formaliza o relatório.</p>
-        </div>
-        <div class="feature-card">
-            <!-- <div class="feature-icon">🔄</div> -->
-            <h3 class="feature-title">Automação de Carteiras</h3>
-            <p class="feature-desc">Crie, automatize e gerencie carteiras de crédito com segmentação adaptativa de
-                clientes baseada em comportamento e histórico.</p>
-        </div>
-        <div class="feature-card">
-            <!-- <div class="feature-icon">🏗️</div> -->
-            <h3 class="feature-title">Infraestrutura Adaptativa</h3>
-            <p class="feature-desc">Desenvolvimento sob medida para o cliente. Processamento multiescalonado que vai do
-                Data Mining à criação de Data Marts estratégicos.</p>
-        </div>
-        <div class="feature-card">
-            <!-- <div class="feature-icon">📈</div> -->
-            <h3 class="feature-title">Dashboards Power BI</h3>
-            <p class="feature-desc">Geração automática de dashboards interativos em Power BI, prontos para apresentação
-                executiva e tomada de decisão.</p>
-        </div>
-        <div class="feature-card">
-            <!-- <div class="feature-icon">🛡️</div> -->
-            <h3 class="feature-title">Segurança & Compliance</h3>
-            <p class="feature-desc">Processamento regulatório, auditoria contínua e proteção de dados sensíveis em
-                conformidade com LGPD e normas bancárias.</p>
-        </div>
-    </section>
+    <div class="layer-tabs">
+      <button class="layer-tab active" data-layer="website">01 · Website</button>
+      <button class="layer-tab" data-layer="platform">02 · Plataforma Operacional</button>
+      <button class="layer-tab" data-layer="infra">03 · Infraestrutura Financeira</button>
+    </div>
 
-    <section id="process" class="process-flow">
-        <span class="eyebrow">Fluxo Inteligente</span>
-        <h2>Processamento Multiescalonado</h2>
-        <p style="color: var(--muted); margin: 0 auto 2rem;">Do dado bruto à inteligência estratégica</p>
+    <div class="layer-panel active" id="layer-website">
+      <div class="layer-intro">
+        <h3>Website Institucional</h3>
+        <p class="center">Porta de entrada do ecossistema. Apresenta a BRLIA, demonstra tecnologia, explica o modelo de negócios e converte empresas e parceiros.</p>
+      </div>
+      <div class="layer-grid">
+        <div class="layer-block">
+          <h4>Aquisição</h4>
+          <ul><li>Apresentação comercial</li><li>Demonstração interativa</li><li>Conversão de empresas</li><li>Captação de parceiros</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>Conteúdo</h4>
+          <ul><li>Bureau & IA</li><li>Rating e risco</li><li>Infraestrutura financeira</li><li>Compliance</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>Experiência</h4>
+          <ul><li>Visualização 3D do ecossistema</li><li>Fluxos de dados animados</li><li>Glassmorphism</li><li>Navegação fluida</li></ul>
+        </div>
+      </div>
+    </div>
 
-        <div class="flow-steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h3>Data Mining</h3>
-                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Extração e limpeza de dados
-                    brutos de múltiplas fontes (Excel, CSV, APIs).</p>
+    <div class="layer-panel" id="layer-platform">
+      <div class="layer-intro">
+        <h3>Plataforma Operacional</h3>
+        <p class="center">Ambiente autenticado onde clientes, analistas e parceiros executam análise de risco, gestão de carteiras, IA, BI e administração.</p>
+      </div>
+      <div class="layer-grid">
+        <div class="layer-block">
+          <h4>Bureau & Rating</h4>
+          <ul><li>Importação XLSX/CSV</li><li>Limpeza e padronização</li><li>Rating automático</li><li>Probabilidade de inadimplência</li><li>Limite sugerido</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>IA & BI</h4>
+          <ul><li>Machine Learning</li><li>Explainable AI</li><li>Data Marts</li><li>Dashboards Power BI</li><li>Auditoria de decisões</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>Gestão</h4>
+          <ul><li>Carteiras e exposição</li><li>Clientes e parceiros</li><li>Permissões e RBAC</li><li>Logs e incidentes</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-panel" id="layer-infra">
+      <div class="layer-intro">
+        <h3>Infraestrutura Financeira</h3>
+        <p class="center">Camada de serviços modulares e orientada a APIs. Orquestra crédito, recebíveis, liquidação, escrow, ledger e tesouraria — via parceiros habilitados.</p>
+      </div>
+      <div class="layer-grid">
+        <div class="layer-block">
+          <h4>Orquestração</h4>
+          <ul><li>API Gateway</li><li>Transaction Orchestrator</li><li>AI Risk Decision Engine</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>Financeiro</h4>
+          <ul><li>Receivables Intelligence</li><li>Instant Settlement Engine</li><li>Smart Escrow Manager</li></ul>
+        </div>
+        <div class="layer-block">
+          <h4>Controle</h4>
+          <ul><li>Financial Ledger</li><li>Treasury Intelligence</li><li>Conciliação e auditoria</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUREAU & IA -->
+  <section id="bureau">
+    <span class="eyebrow">Bureau & Inteligência</span>
+    <h2 class="center">Do dado bruto à decisão auditável</h2>
+    <p class="center">Análise de risco, rating e inteligência de crédito com IA explicável, rastreável e sujeita a revisão humana.</p>
+    <div class="features">
+      <div class="feature-card"><h3 class="feature-title">Bureau de Crédito & IA</h3><p class="feature-desc">Análise de carteiras com machine learning para prever inadimplência e otimizar concessão.</p></div>
+      <div class="feature-card"><h3 class="feature-title">Rating em Tempo Real</h3><p class="feature-desc">XLSX, CSV ou Excel → classificação automática → analista formaliza o relatório.</p></div>
+      <div class="feature-card"><h3 class="feature-title">Automação de Carteiras</h3><p class="feature-desc">Segmentação adaptativa por comportamento, histórico e concentração de risco.</p></div>
+      <div class="feature-card"><h3 class="feature-title">Infraestrutura Adaptativa</h3><p class="feature-desc">Do Data Mining ao Data Mart estratégico, com processamento multiescalonado.</p></div>
+      <div class="feature-card"><h3 class="feature-title">Dashboards Power BI</h3><p class="feature-desc">Geração automática de dashboards prontos para apresentação executiva.</p></div>
+      <div class="feature-card"><h3 class="feature-title">Segurança & Compliance</h3><p class="feature-desc">LGPD, auditoria contínua e proteção de dados sensíveis.</p></div>
+    </div>
+  </section>
+
+  <!-- PLATAFORMA (PREVIEW) -->
+  <section id="plataforma">
+    <span class="eyebrow">Camada 02 · Prévia</span>
+    <h2 class="center">Plataforma Operacional</h2>
+    <p class="center">Prévia visual da interface autenticada. Os dados abaixo são ilustrativos e não representam operação real.</p>
+
+    <div class="mock-dash">
+      <span class="mock-badge">Demonstração visual — não conectada a backend</span>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Carteiras analisadas</div><div class="kpi-value purple">—</div></div>
+        <div class="kpi"><div class="kpi-label">Exposição de crédito</div><div class="kpi-value">—</div></div>
+        <div class="kpi"><div class="kpi-label">Score médio</div><div class="kpi-value green">—</div></div>
+        <div class="kpi"><div class="kpi-label">Inadimplência estimada</div><div class="kpi-value yellow">—</div></div>
+      </div>
+      <div style="margin-top:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-bottom:.4rem"><span>Distribuição de ratings</span><span>ilustrativo</span></div>
+        <div class="bar"><div class="bar-fill" style="width:0%"></div></div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.5rem">
+        <button class="btn-cta secondary" disabled style="opacity:.5;cursor:not-allowed">Entrar na Plataforma</button>
+        <button class="btn-cta secondary" disabled style="opacity:.5;cursor:not-allowed">Solicitar Acesso</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--muted);margin:1.2rem 0 0;text-align:center;opacity:.8">Acesso liberado após contratação e provisionamento de credenciais.</p>
+    </div>
+  </section>
+
+  <!-- INFRAESTRUTURA -->
+  <section id="infraestrutura">
+    <span class="eyebrow">Camada 03 · Arquitetura</span>
+    <h2 class="center">Infraestrutura Financeira</h2>
+    <p class="center">Fluxo de orquestração entre serviços. Integrações com Pix, SPI, STR e instituições ocorrem somente via participantes e parceiros efetivamente autorizados.</p>
+
+    <div class="flow">
+      <span class="flow-node">API Gateway</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Orchestrator</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Risk Engine</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Receivables</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Settlement</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Escrow</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Ledger</span><span class="flow-arrow">→</span>
+      <span class="flow-node">Conciliação</span>
+    </div>
+
+    <div class="states">
+      <span class="state">INITIATED</span>
+      <span class="state">VALIDATED</span>
+      <span class="state ok">APPROVED</span>
+      <span class="state warn">PROCESSING</span>
+      <span class="state ok">SETTLED</span>
+      <span class="state warn">RECONCILIATION_PENDING</span>
+      <span class="state bad">FAILED</span>
+      <span class="state">CANCELLED</span>
+    </div>
+
+    <div class="grid3" style="margin-top:3rem">
+      <div class="card"><h3 class="feature-title">Instant Settlement</h3><p class="feature-desc">Orquestração de liquidação com estados rastreáveis e confirmação por sistema autorizado.</p></div>
+      <div class="card"><h3 class="feature-title">Smart Escrow</h3><p class="feature-desc">Condições comerciais, evidências documentais e auditoria de liberação de recursos.</p></div>
+      <div class="card"><h3 class="feature-title">Financial Ledger</h3><p class="feature-desc">Partidas dobradas, trilha imutável, conciliação e identificação de divergências.</p></div>
+    </div>
+  </section>
+
+  <!-- PROCESSO -->
+  <section id="processo" class="process-flow">
+    <span class="eyebrow">Fluxo Inteligente</span>
+    <h2>Processamento Multiescalonado</h2>
+    <p class="center" style="margin:0 auto 1rem">Do dado bruto à inteligência estratégica</p>
+    <div class="flow-steps">
+      <div class="step"><div class="step-number">1</div><h3>Data Mining</h3><p>Extração e limpeza de dados brutos de múltiplas fontes.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="step-number">2</div><h3>Planejamento Estratégico</h3><p>Modelos de IA e regras de negócio e risco.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="step-number">3</div><h3>Data Marts</h3><p>Bases estruturadas para dashboards e relatórios.</p></div>
+    </div>
+  </section>
+
+  <!-- MODELO DE NEGÓCIO -->
+  <section id="modelo">
+    <span class="eyebrow">Modelo de Negócios</span>
+    <h2 class="center">Como a BRLIA gera receita nas três camadas</h2>
+    <p class="center">Website adquire. Plataforma recorre. Infraestrutura opera. Cada camada tem fonte de receita própria e se reforça mutuamente.</p>
+
+    <div class="grid3">
+      <div class="card"><h4 style="color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;margin-bottom:1rem">01 · Website</h4><p class="feature-desc">Aquisição de clientes, demonstrações, captação de parceiros e contratação de serviços.</p></div>
+      <div class="card"><h4 style="color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;margin-bottom:1rem">02 · Plataforma</h4><p class="feature-desc">Assinaturas empresariais, licenciamento, análise de crédito, BI e planos corporativos.</p></div>
+      <div class="card"><h4 style="color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-size:.8rem;margin-bottom:1rem">03 · Infraestrutura</h4><p class="feature-desc">Tarifas operacionais, taxas por processamento, APIs e serviços de parceiros habilitados.</p></div>
+    </div>
+
+    <div class="sim">
+      <h3 style="text-align:center;margin-bottom:.4rem">Simulador de Receita</h3>
+      <p class="center" style="font-size:.85rem;margin-bottom:2rem">Variáveis editáveis. Todos os valores são simulações ilustrativas — não representam faturamento, clientes ou margens reais.</p>
+      <div class="sim-grid">
+        <div>
+          <div class="sim-field"><label>Clientes empresariais</label><input type="number" id="sim-clientes" value="40" min="0"></div>
+          <div class="sim-field"><label>Receita recorrente por cliente (R$/mês)</label><input type="number" id="sim-recorrente" value="2500" min="0"></div>
+          <div class="sim-field"><label>Volume mensal processado (R$)</label><input type="number" id="sim-volume" value="20000000" min="0"></div>
+          <div class="sim-field"><label>Taxa por operação (%)</label><input type="number" id="sim-taxa" value="0.8" step="0.1" min="0"></div>
+          <div class="sim-field"><label>Custo de infraestrutura (% do volume)</label><input type="number" id="sim-infra" value="0.1" step="0.05" min="0"></div>
+          <div class="sim-field"><label>Custo operacional mensal (R$)</label><input type="number" id="sim-opex" value="60000" min="0"></div>
+        </div>
+        <div class="sim-output">
+          <div class="sim-row"><span>Receita recorrente</span><span id="out-recorrente">—</span></div>
+          <div class="sim-row"><span>Receita transacional</span><span id="out-transacional">—</span></div>
+          <div class="sim-row"><span>Receita total</span><span id="out-total">—</span></div>
+          <div class="sim-row"><span>Custos totais</span><span id="out-custos">—</span></div>
+          <div class="sim-row total"><span>Margem operacional</span><span id="out-margem">—</span></div>
+          <div class="sim-row"><span>Margem %</span><span id="out-margempct">—</span></div>
+          <p class="sim-note">Simulação ilustrativa. Não representa projeção financeira auditada.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEGURANÇA -->
+  <section id="seguranca">
+    <span class="eyebrow">Segurança & Governança</span>
+    <h2 class="center">Compliance desde a arquitetura</h2>
+    <p class="center">A BRLIA distingue claramente serviços de tecnologia, análise de crédito e inteligência de dados de atividades financeiras reguladas.</p>
+    <div class="grid3">
+      <div class="card"><h3 class="feature-title">LGPD & Consentimento</h3><p class="feature-desc">Bases legais, controle de consentimento, segregação de clientes e retenção.</p></div>
+      <div class="card"><h3 class="feature-title">Identidade & Acesso</h3><p class="feature-desc">OAuth2, JWT, mTLS, RBAC, criptografia AES-256 e gestão segura de chaves.</p></div>
+      <div class="card"><h3 class="feature-title">Governança de IA</h3><p class="feature-desc">Rastreabilidade de decisões, Explainable AI, versionamento e revisão humana.</p></div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo">
+    <div class="demo-container">
+      <div style="text-align:center">
+        <span class="eyebrow">Versão Trial</span>
+        <h2 style="margin-bottom:.5rem">Demo: Análise de Risco</h2>
+        <p class="center" style="margin:0 auto">Carregue sua base e veja a IA em ação. O processamento é simulado localmente; em produção, ocorre em infraestrutura adaptativa BRLIA®.</p>
+      </div>
+      <div class="demo-grid">
+        <div>
+          <div class="form-group">
+            <label>1. Selecione o arquivo (XLSX, CSV, Excel)</label>
+            <div class="upload-area" id="drop-zone">
+              <div class="upload-icon">📁</div>
+              <p id="file-name" style="color:var(--muted);margin:0;font-size:.9rem">Arraste seu arquivo aqui ou clique para selecionar</p>
+              <input type="file" id="file-input" accept=".xlsx,.csv,.xls" style="display:none">
             </div>
-            <div class="arrow">→</div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h3>Planejamento Estratégico</h3>
-                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Aplicação de modelos de IA e
-                    definição de regras de negócio e risco.</p>
+          </div>
+          <div class="form-group">
+            <label>2. Perfil de risco alvo</label>
+            <div class="risk-selector">
+              <div class="risk-option active" data-risk="low">Low Risk</div>
+              <div class="risk-option" data-risk="medium">Medium Risk</div>
+              <div class="risk-option" data-risk="high">High Risk</div>
             </div>
-            <div class="arrow">→</div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h3>Data Marts</h3>
-                <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">Geração de bases estruturadas
-                    para dashboards e relatórios finais.</p>
-            </div>
+          </div>
+          <button class="btn-cta" style="width:100%;padding:1rem" id="analyze-btn">Gerar Rating Automático</button>
+          <p style="font-size:.72rem;color:var(--muted);margin-top:1rem;text-align:center;opacity:.8">*Processamento simulado localmente. Nenhum dado é enviado a servidores.</p>
         </div>
-    </section>
-
-    <section id="demo" class="demo-section">
-        <div class="demo-container">
-            <div class="demo-header">
-                <span class="eyebrow">Versão Trial</span>
-                <h2 style="margin-bottom: 0.5rem;">Demo: Análise de Risco</h2>
-                <p style="color: var(--muted); margin: 0 auto;">Carregue sua base de dados e veja a IA em ação.</p>
+        <div class="result-area">
+          <div class="loading-overlay" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-bottom:.5rem;font-size:.9rem">Processando Dados...</p>
+            <p style="font-size:.8rem;color:var(--muted)" id="loading-status">Conectando ao Motor de IA...</p>
+          </div>
+          <div class="report-content" id="report-result">
+            <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:1rem">
+              <div>
+                <h3 style="margin-bottom:.5rem">Relatório de Rating Gerado</h3>
+                <p style="font-size:.85rem;color:var(--muted);margin:0">ID da Análise: <span id="analysis-id" style="color:var(--accent)">#BRL-8829</span></p>
+              </div>
+              <div class="rating-badge rating-a" id="rating-badge">AAA</div>
             </div>
-
-            <div class="demo-grid">
-                <div class="input-panel">
-                    <div class="form-group">
-                        <label>1. Selecione o Arquivo (XLSX, CSV, Excel)</label>
-                        <div class="upload-area" id="drop-zone">
-                            <div class="upload-icon">📁</div>
-                            <p id="file-name" style="color: var(--muted); margin: 0;">Arraste seu arquivo aqui ou clique
-                                para selecionar</p>
-                            <input type="file" id="file-input" accept=".xlsx,.csv,.xls" style="display: none;">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>2. Defina o Perfil de Risco Alvo</label>
-                        <div class="risk-selector">
-                            <div class="risk-option active" data-risk="low">Low Risk</div>
-                            <div class="risk-option" data-risk="medium">Medium Risk</div>
-                            <div class="risk-option" data-risk="high">High Risk</div>
-                        </div>
-                    </div>
-
-                    <button class="btn-cta" style="width: 100%; padding: 1rem;" id="analyze-btn">
-                        Gerar Rating Automático
-                    </button>
-
-                    <p
-                        style="font-size: 0.75rem; color: var(--muted); margin-top: 1rem; text-align: center; opacity: 0.7;">
-                        *Processamento simulado localmente. Em produção, ocorre em infraestrutura adaptativa BRLIA®.
-                    </p>
-                </div>
-
-                <div class="result-area">
-                    <div class="loading-overlay" id="loading">
-                        <div class="spinner"></div>
-                        <p style="margin-bottom: 0.5rem;">Processando Dados...</p>
-                        <p style="font-size: 0.8rem; color: var(--muted);" id="loading-status">Conectando ao Motor de
-                            IA...</p>
-                    </div>
-
-                    <div class="report-content" id="report-result">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
-                            <div>
-                                <h3 style="margin-bottom: 0.5rem;">Relatório de Rating Gerado</h3>
-                                <p style="font-size: 0.9rem; color: var(--muted); margin: 0;">ID da Análise: <span
-                                        id="analysis-id" style="color: var(--accent);">#BRL-8829</span></p>
-                            </div>
-                            <div class="rating-badge rating-a" id="rating-badge">AAA</div>
-                        </div>
-
-                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-                            <h4 style="margin-bottom: 1rem; color: var(--text);">Resumo Executivo</h4>
-                            <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.5;">
-                                A carteira analisada apresenta <span id="risk-text"
-                                    style="color: var(--success); font-weight: 600;">baixa probabilidade</span> de
-                                inadimplência nos próximos 12 meses. Recomenda-se aprovação automática para 85% dos
-                                registros.
-                            </p>
-
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-value" id="score-value" style="color: var(--success);">92%</div>
-                                    <div class="stat-label">Score Médio</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">1,240</div>
-                                    <div class="stat-label">Registros Analisados</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">0.4s</div>
-                                    <div class="stat-label">Tempo de Processamento</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value" style="color: var(--accent);">Power BI</div>
-                                    <div class="stat-label">Dashboard Pronto</div>
-                                </div>
-                            </div>
-
-                            <button class="btn-cta secondary" style="width: 100%; margin-top: 1.5rem;">
-                                📥 Baixar Relatório Formatado (PDF)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="empty-state"
-                        style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted);">
-                        <p style="margin: 0;">Aguardando dados para análise...</p>
-                    </div>
-                </div>
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+              <h4 style="margin-bottom:.8rem">Resumo Executivo</h4>
+              <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;line-height:1.5">A carteira analisada apresenta <span id="risk-text" style="color:var(--success);font-weight:600">baixa probabilidade</span> de inadimplência nos próximos 12 meses. Recomenda-se aprovação automática para 85% dos registros.</p>
+              <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="score-value" style="color:var(--success)">92%</div><div class="stat-label">Score Médio</div></div>
+                <div class="stat-card"><div class="stat-value">1.240</div><div class="stat-label">Registros Analisados</div></div>
+                <div class="stat-card"><div class="stat-value">0.4s</div><div class="stat-label">Tempo de Processamento</div></div>
+                <div class="stat-card"><div class="stat-value" style="color:var(--accent)">Power BI</div><div class="stat-label">Dashboard Pronto</div></div>
+              </div>
+              <button class="btn-cta secondary" style="width:100%;margin-top:1.2rem">📥 Baixar Relatório (PDF)</button>
             </div>
+          </div>
+          <div id="empty-state" style="height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--muted);min-height:280px">
+            <p style="margin:0;font-size:.9rem">Aguardando dados para análise...</p>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <footer id="contact">
-        <div class="footer-links">
-            <a href="#">Sobre a BRLIA</a>
-            <a href="#">API Documentation</a>
-            <a href="#">Compliance</a>
-            <a href="#">Suporte</a>
-        </div>
-        <p>&copy; 2026 BRLIA® — Bureau Financeiro & Liquidação em Tempo Real. Todos os direitos reservados.</p>
-        <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.5;">Infraestrutura Adaptativa | Processamento
-            Multiescalonado | IA Generativa Financeira</p>
-    </footer>
+</main>
 
-    <script>
-        // === UI Elements ===
-        const glow = document.getElementById('glow');
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
+<footer id="contato">
+  <div class="footer-links">
+    <a href="#arquitetura">Arquitetura</a>
+    <a href="#plataforma">Plataforma</a>
+    <a href="#infraestrutura">Infraestrutura</a>
+    <a href="#modelo">Modelo</a>
+    <a href="#seguranca">Compliance</a>
+  </div>
+  <p>&copy; 2026 BRLIA® — Intelligent Credit & Financial Infrastructure. Todos os direitos reservados.</p>
+  <p style="font-size:.78rem;margin-top:1rem;opacity:.5">Infraestrutura Adaptativa | Processamento Multiescalonado | IA Financeira Explicável</p>
+</footer>
 
-        // === Glow Effect ===
-        document.addEventListener('mousemove', (e) => {
-            glow.style.transform = `translate(${(e.clientX - window.innerWidth / 2) * 0.05}px, ${(e.clientY - window.innerHeight / 2) * 0.05}px)`;
-        });
+<script>
+// === Glow ===
+const glow = document.getElementById('glow');
+document.addEventListener('mousemove', e => {
+  glow.style.transform = `translate(${(e.clientX - window.innerWidth/2)*0.05}px, ${(e.clientY - window.innerHeight/2)*0.05}px)`;
+});
 
-        // === Canvas Particles ===
-        let particles = [];
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
+// === Particle network ===
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.2;
-                this.vy = (Math.random() - 0.5) * 0.2;
-                this.size = Math.random() * 1.5 + 0.5;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(139, 92, 246, 0.3)';
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        for (let i = 0; i < 50; i++) particles.push(new Particle());
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
+class Particle {
+  constructor(){
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
+    this.vx = (Math.random()-0.5)*0.25;
+    this.vy = (Math.random()-0.5)*0.25;
+    this.size = Math.random()*1.5+0.5;
+  }
+  update(){
+    this.x += this.vx; this.y += this.vy;
+    if(this.x<0||this.x>canvas.width) this.vx *= -1;
+    if(this.y<0||this.y>canvas.height) this.vy *= -1;
+  }
+  draw(){
+    ctx.fillStyle = 'rgba(139,92,246,0.35)';
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
+  }
+}
+const COUNT = Math.min(60, Math.floor(window.innerWidth/22));
+for(let i=0;i<COUNT;i++) particles.push(new Particle());
 
-        // === Demo Logic ===
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const fileNameDisplay = document.getElementById('file-name');
-        const riskOptions = document.querySelectorAll('.risk-option');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const loadingOverlay = document.getElementById('loading');
-        const loadingStatus = document.getElementById('loading-status');
-        const reportResult = document.getElementById('report-result');
-        const emptyState = document.getElementById('empty-state');
-        const ratingBadge = document.getElementById('rating-badge');
-        const riskText = document.getElementById('risk-text');
-        const scoreValue = document.getElementById('score-value');
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  // connections
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < 140){
+        ctx.strokeStyle = `rgba(139,92,246,${0.12*(1-dist/140)})`;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+}
+animate();
 
-        let selectedRisk = 'low';
-        let selectedFile = null;
+// === Layer tabs ===
+document.querySelectorAll('.layer-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.layer-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.layer-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    const target = document.getElementById('layer-' + tab.dataset.layer);
+    if(target) target.classList.add('active');
+  });
+});
 
-        // Risk Selection
-        riskOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                riskOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                selectedRisk = option.dataset.risk;
-            });
-        });
+// === Revenue simulator ===
+const simInputs = ['sim-clientes','sim-recorrente','sim-volume','sim-taxa','sim-infra','sim-opex'];
+function fmt(n){ return 'R$ ' + n.toLocaleString('pt-BR', {maximumFractionDigits:0}); }
+function calcSim(){
+  const clientes = +document.getElementById('sim-clientes').value || 0;
+  const recorrente = +document.getElementById('sim-recorrente').value || 0;
+  const volume = +document.getElementById('sim-volume').value || 0;
+  const taxa = +document.getElementById('sim-taxa').value || 0;
+  const infra = +document.getElementById('sim-infra').value || 0;
+  const opex = +document.getElementById('sim-opex').value || 0;
+  const recRec = clientes * recorrente;
+  const recTrans = volume * (taxa/100);
+  const total = recRec + recTrans;
+  const custos = volume * (infra/100) + opex;
+  const margem = total - custos;
+  const pct = total > 0 ? (margem/total*100) : 0;
+  document.getElementById('out-recorrente').textContent = fmt(recRec);
+  document.getElementById('out-transacional').textContent = fmt(recTrans);
+  document.getElementById('out-total').textContent = fmt(total);
+  document.getElementById('out-custos').textContent = fmt(custos);
+  document.getElementById('out-margem').textContent = fmt(margem);
+  document.getElementById('out-margempct').textContent = pct.toFixed(1) + '%';
+}
+simInputs.forEach(id => document.getElementById(id).addEventListener('input', calcSim));
+calcSim();
 
-        // File Upload
-        dropZone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                selectedFile = e.target.files[0];
-                fileNameDisplay.textContent = `✓ ${selectedFile.name}`;
-                fileNameDisplay.style.color = 'var(--accent)';
-            }
-        });
+// === Demo logic ===
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const fileNameDisplay = document.getElementById('file-name');
+const riskOptions = document.querySelectorAll('.risk-option');
+const analyzeBtn = document.getElementById('analyze-btn');
+const loadingOverlay = document.getElementById('loading');
+const loadingStatus = document.getElementById('loading-status');
+const reportResult = document.getElementById('report-result');
+const emptyState = document.getElementById('empty-state');
+const ratingBadge = document.getElementById('rating-badge');
+const riskText = document.getElementById('risk-text');
+const scoreValue = document.getElementById('score-value');
+let selectedRisk = 'low', selectedFile = null;
 
-        // Drag & Drop
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; });
-        dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--border)'; });
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault(); dropZone.style.borderColor = 'var(--border)';
-            if (e.dataTransfer.files.length) {
-                selectedFile = e.dataTransfer.files[0];
-                fileNameDisplay.textContent = `✓ ${selectedFile.name}`;
-                fileNameDisplay.style.color = 'var(--accent)';
-            }
-        });
+riskOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    riskOptions.forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    selectedRisk = opt.dataset.risk;
+  });
+});
 
-        // Analysis Simulation
-        analyzeBtn.addEventListener('click', () => {
-            if (!selectedFile) {
-                alert('Por favor, selecione um arquivo (XLSX, CSV ou Excel) primeiro.');
-                return;
-            }
-            emptyState.style.display = 'none';
-            reportResult.classList.remove('visible');
-            loadingOverlay.classList.add('visible');
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  if(e.target.files.length){
+    selectedFile = e.target.files[0];
+    fileNameDisplay.textContent = '✓ ' + selectedFile.name;
+    fileNameDisplay.style.color = 'var(--accent)';
+  }
+});
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='var(--accent)'; });
+dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.style.borderColor='var(--border)'; });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.style.borderColor='var(--border)';
+  if(e.dataTransfer.files.length){
+    selectedFile = e.dataTransfer.files[0];
+    fileNameDisplay.textContent = '✓ ' + selectedFile.name;
+    fileNameDisplay.style.color = 'var(--accent)';
+  }
+});
 
-            const steps = ["Lendo estrutura...", "Aplicando Data Mining...", "IA Processando...", "Gerando Rating...", "Formatando Relatório..."];
-            let stepIndex = 0;
-            const interval = setInterval(() => {
-                if (stepIndex < steps.length) { loadingStatus.textContent = steps[stepIndex]; stepIndex++; }
-            }, 600);
+analyzeBtn.addEventListener('click', () => {
+  if(!selectedFile){ alert('Selecione um arquivo (XLSX, CSV ou Excel) primeiro.'); return; }
+  emptyState.style.display = 'none';
+  reportResult.classList.remove('visible');
+  loadingOverlay.classList.add('visible');
+  const steps = ['Lendo estrutura...','Aplicando Data Mining...','IA processando...','Gerando rating...','Formatando relatório...'];
+  let i = 0;
+  const interval = setInterval(() => {
+    if(i < steps.length){ loadingStatus.textContent = steps[i]; i++; }
+  }, 600);
+  setTimeout(() => {
+    clearInterval(interval);
+    loadingOverlay.classList.remove('visible');
+    showResults();
+  }, 3500);
+});
 
-            setTimeout(() => {
-                clearInterval(interval);
-                loadingOverlay.classList.remove('visible');
-                showResults();
-            }, 3500);
-        });
-
-        function showResults() {
-            let ratingText = 'AAA', riskDesc = 'baixa probabilidade', scoreColor = 'var(--success)', scoreVal = '92%', ratingClass = 'rating-a';
-
-            if (selectedRisk === 'medium') {
-                ratingText = 'BBB'; riskDesc = 'probabilidade moderada'; scoreVal = '78%'; scoreColor = 'var(--warning)'; ratingClass = 'rating-b';
-            } else if (selectedRisk === 'high') {
-                ratingText = 'CCC'; riskDesc = 'alta probabilidade'; scoreVal = '45%'; scoreColor = 'var(--danger)'; ratingClass = 'rating-c';
-            }
-
-            ratingBadge.textContent = ratingText;
-            ratingBadge.className = `rating-badge ${ratingClass}`;
-            riskText.textContent = riskDesc;
-            riskText.style.color = scoreColor;
-            scoreValue.textContent = scoreVal;
-            scoreValue.style.color = scoreColor;
-            document.getElementById('analysis-id').textContent = '#BRL-' + Math.floor(Math.random() * 9000 + 1000);
-
-            setTimeout(() => reportResult.classList.add('visible'), 50);
-        }
-
-        // === CTA Redirect ===
-        document.querySelectorAll('.btn-cta').forEach(btn => {
-            btn.onclick = e => { e.preventDefault(); window.location.href = 'demo.html'; };
-        });
-
-        // === Smooth Scroll for Anchor Links ===
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-    </script>
+function showResults(){
+  let rating='AAA', desc='baixa probabilidade', color='var(--success)', score='92%', cls='rating-a';
+  if(selectedRisk==='medium'){ rating='BBB'; desc='probabilidade moderada'; score='78%'; color='var(--warning)'; cls='rating-b'; }
+  if(selectedRisk==='high'){ rating='CCC'; desc='alta probabilidade'; score='45%'; color='var(--danger)'; cls='rating-c'; }
+  ratingBadge.textContent = rating;
+  ratingBadge.className = 'rating-badge ' + cls;
+  riskText.textContent = desc;
+  riskText.style.color = color;
+  scoreValue.textContent = score;
+  scoreValue.style.color = color;
+  document.getElementById('analysis-id').textContent = '#BRL-' + Math.floor(Math.random()*9000+1000);
+  setTimeout(() => reportResult.classList.add('visible'), 50);
+}
+</script>
 </body>
-
 </html>
