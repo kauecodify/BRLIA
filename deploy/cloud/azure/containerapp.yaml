@@ -1,0 +1,21 @@
+properties:
+  configuration:
+    ingress:
+      external: false
+    secrets: []
+  template:
+    containers:
+      - name: pool-engine
+        image: brlia/pool-engine:2.1.0
+        env:
+          - name: BRLIA_DEPLOY_MODE
+            value: managed
+          - name: BRLIA_POOL_TICK_MS
+            value: "1"
+          - name: BRLIA_GRPC_TARGET
+            value: pool-controlplane.internal:443
+          - name: BRLIA_SPIFFE_ID
+            value: spiffe://brlia.local/azure/container-apps/pool-engine
+        resources:
+          cpu: 2
+          memory: 4Gi

@@ -1,0 +1,20 @@
+[Unit]
+Description=BRLIA co-located pool agent
+After=network.target
+
+[Service]
+Type=simple
+User=brlia
+Group=brlia
+Environment=BRLIA_DEPLOY_MODE=standalone
+Environment=BRLIA_POOL_TICK_MS=1
+Environment=BRLIA_UDS_PATH=/var/run/brlia/pool.sock
+Environment=BRLIA_WAL_PATH=/var/lib/brlia/pool.wal
+RuntimeDirectory=brlia
+StateDirectory=brlia
+ExecStart=/usr/bin/python3 /opt/brlia/host-adapter/agent.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

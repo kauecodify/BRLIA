@@ -1,0 +1,10 @@
+netting:
+  scheme: multilateral
+  group_by: [jurisdiction, functional_currency, window]
+  output: K_liquid_entries
+  invariant: "K <= N"
+  entry_fields: [pool_id, window_seq, idempotency_key, origin_operation_trail]
+  forbidden:
+    - debit_capital_social
+    - mutate_genesis
+  liquidity_source: treasury-service.liquidity_ceiling_minor

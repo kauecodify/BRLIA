@@ -1,0 +1,27 @@
+services:
+  pool-engine:
+    image: brlia/pool-engine:2.1.0
+    environment:
+      BRLIA_DEPLOY_MODE: sidecar
+      BRLIA_POOL_TICK_MS: "1"
+      BRLIA_UDS_PATH: /var/run/brlia/pool.sock
+      BRLIA_CONTROL_SOCKET: /var/run/brlia/control.sock
+    volumes:
+      - brlia-run:/var/run/brlia
+      - brlia-wal:/var/lib/brlia
+    ports: []
+
+  host-adapter:
+    image: brlia/host-adapter:2.1.0
+    environment:
+      BRLIA_DEPLOY_MODE: sidecar
+      BRLIA_UDS_PATH: /var/run/brlia/pool.sock
+      BRLIA_WAL_PATH: /var/lib/brlia/host-adapter.wal
+    volumes:
+      - brlia-run:/var/run/brlia
+      - brlia-wal:/var/lib/brlia
+    network_mode: none
+
+volumes:
+  brlia-run:
+  brlia-wal:

@@ -1,0 +1,26 @@
+slo:
+  note: "limites configurados; nao sao medicoes. Execucao: make bench-pool"
+  admit_uds_ring_pool_id:
+    p50_ms: 0.15
+    p99_ms: 1
+    p999_ms: 2
+    constraints: [no-network, no-fsync, no-sleep]
+  close_netting_pool_closed:
+    p50_ms: 0.8
+    p99_ms: 3
+    p999_ms: 5
+    constraints: [one-event-per-window]
+  pool_closed_to_orchestrator:
+    p50_ms: 2
+    p99_ms: 10
+    p999_ms: 20
+    constraints: [async-outbox]
+  window_duration_ms:
+    value: 1
+    clock: CLOCK_MONOTONIC_RAW
+    constraints: [no-drift]
+ci:
+  bench: tests/pool/bench_pool.py
+  ops: 100000
+  histogram: hdr
+  fail_if: "p99(close+netting) > 5ms"

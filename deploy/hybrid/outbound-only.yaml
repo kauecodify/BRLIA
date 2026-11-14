@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brlia-egress-policy
+  labels:
+    brlia.io/mode: hybrid
+data:
+  egress_policy.yaml: |
+    version: "2.1"
+    mode: hybrid
+    defaults:
+      local_first: true
+      outbound_only: true
+      public_ingress: forbidden
+      client_data_leaves_host: false
+    egress_targets:
+      control-plane:
+        transport: outbound-only
+        mtls: required
+        spiffe: required
+    network_policy:
+      deny_ingress: true
+      allow_egress:
+        - to: control-plane
+          ports: [443]

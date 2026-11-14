@@ -1,0 +1,39 @@
+# Politica de saida do host-adapter: local-first e outbound-only.
+version: "2.1"
+mode: hybrid
+defaults:
+  local_first: true
+  outbound_only: true
+  public_ingress: forbidden
+  client_data_leaves_host: false
+categories:
+  client-data:
+    destination: local
+    pseudonymize: false
+    leave_host: false
+  operational-metrics:
+    destination: control-plane
+    pseudonymize: true
+    leave_host: true
+  pool-events:
+    destination: control-plane
+    pseudonymize: true
+    leave_host: true
+    fields:
+      - pool_id
+      - pool_key
+      - window_seq
+      - composition_hash
+      - netting_summary
+pseudonymization:
+  algorithm: sha256-with-host-salt
+  salt_storage: host-only
+  direct_identifiers: [cpf, cnpj, iban, account_number, holder_name]
+carve_outs:
+  description: "orcamento de excecao vigiado, com vigencia definida"
+  entries: []
+egress_targets:
+  control-plane:
+    transport: outbound-only
+    mtls: required
+    spiffe: required

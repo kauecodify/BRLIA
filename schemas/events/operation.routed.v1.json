@@ -1,0 +1,25 @@
+{
+  "schema_version": "operation.routed.v1",
+  "title": "OperationRouted",
+  "description": "Publicado pelo routing-engine com decisao e pool_key antes da orquestracao.",
+  "type": "object",
+  "required": ["event_id", "event_type", "operation_id", "decision", "pool_key", "idempotency_key"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_type": { "type": "string", "const": "operation.routed.v1" },
+    "operation_id": { "type": "string" },
+    "decision": { "type": "string", "enum": ["br", "intl", "fx", "br_intl"] },
+    "pool_key": {
+      "type": "object",
+      "required": ["jurisdiction", "functional_currency", "monotonic_window", "sequence"],
+      "properties": {
+        "jurisdiction": { "type": "string" },
+        "functional_currency": { "type": "string" },
+        "monotonic_window": { "type": "integer", "minimum": 0 },
+        "sequence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "idempotency_key": { "type": "string", "minLength": 1 },
+    "trace_id": { "type": "string" }
+  }
+}

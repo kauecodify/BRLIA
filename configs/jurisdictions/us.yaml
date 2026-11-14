@@ -1,0 +1,14 @@
+jurisdiction: us
+currency: USD
+scale: 2
+payment_systems: [ACH, Fedwire, RTP]
+identifiers: [EIN, SSN]
+reporting: [FinCEN, CRS, FATCA]
+regulatory_refs:
+  - "Bank Secrecy Act"
+  - "FinCEN Travel Rule"
+data_residency: us
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: uetr

@@ -1,0 +1,21 @@
+tuning:
+  tick_ms: 1
+  cpu_affinity: "2,3"
+  queue_depth: 65536
+  watermark_ms: 5
+  max_ops_per_window: 4096
+hot_path:
+  interpreter: forbidden
+  language: rust-pyo3
+  ring_buffer: mpmc-lock-free
+  copy_policy: zero-copy
+  forbidden_calls: [sleep, gc, fsync, network]
+  clock: CLOCK_MONOTONIC_RAW
+persistence:
+  mode: async-outbox
+  wal: local
+  fsync: deferred
+control_plane:
+  framework: fastapi
+  endpoints: [/health, /ready, /metrics, /config]
+  socket: separate-from-hot-path

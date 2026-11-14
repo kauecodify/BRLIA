@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Envelope de integracao camt.053 (BankToCustomerStatement).
+     Em homologacao, substituir pelo XSD oficial ISO 20022 camt.053.001.xx. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="urn:iso:std:iso:20022:tech:xsd:camt.053.001.08"
+           elementFormDefault="qualified">
+  <xs:include schemaLocation="head.001.001.02.xsd"/>
+  <xs:element name="Document">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BkToCstmrStmt" type="xs:anyType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

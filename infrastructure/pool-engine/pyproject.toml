@@ -1,0 +1,15 @@
+[build-system]
+requires = ["maturin>=1.5"]
+build-backend = "maturin"
+
+[project]
+name = "pool-engine"
+version = "2.1.0"
+requires-python = ">=3.12"
+description = "Pool-engine BRLIA: control plane FastAPI sobre nucleo compilado Rust (PyO3)"
+
+[tool.maturin]
+python-source = "python"
+module-name = "pool_engine.brlia_pool_core_binding"
+features = ["pyo3/extension-module"]
+manifest-path = "core/Cargo.toml"

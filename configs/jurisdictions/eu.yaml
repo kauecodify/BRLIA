@@ -1,0 +1,15 @@
+jurisdiction: eu
+currency: EUR
+scale: 2
+payment_systems: [SEPA, SCT_Inst]
+identifiers: [IBAN, LEI]
+reporting: [MiCA, AMLD6, CRS]
+regulatory_refs:
+  - "PSD2"
+  - "MiCA"
+  - "AMLD6"
+data_residency: eu
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: endToEndId

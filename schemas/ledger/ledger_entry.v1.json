@@ -1,0 +1,21 @@
+{
+  "schema_version": "ledger.entry.v1",
+  "title": "LedgerEntry",
+  "description": "Partida dobrada em minor units, com hash encadeado.",
+  "type": "object",
+  "required": ["entry_id", "correlation_id", "account", "side", "amount_minor", "currency", "scale", "nature"],
+  "properties": {
+    "entry_id": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "account": { "type": "string" },
+    "account_name": { "type": "string" },
+    "side": { "type": "string", "enum": ["D", "C"] },
+    "amount_minor": { "type": "integer", "minimum": 0 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "scale": { "type": "integer", "minimum": 0 },
+    "nature": { "type": "string", "enum": ["capital", "compensacao", "operacao"] },
+    "pool_id": { "type": ["string", "null"] },
+    "previous_hash": { "type": ["string", "null"] },
+    "entry_hash": { "type": "string" }
+  }
+}

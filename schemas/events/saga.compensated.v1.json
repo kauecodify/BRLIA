@@ -1,0 +1,16 @@
+{
+  "schema_version": "saga.compensated.v1",
+  "title": "SagaCompensated",
+  "description": "Compensacao de saga emitida pelo transaction-orchestrator.",
+  "type": "object",
+  "required": ["event_id", "event_type", "saga_id", "operation_id", "reason"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_type": { "type": "string", "const": "saga.compensated.v1" },
+    "saga_id": { "type": "string" },
+    "operation_id": { "type": "string" },
+    "pool_id": { "type": "string" },
+    "reason": { "type": "string" },
+    "trace_id": { "type": "string" }
+  }
+}

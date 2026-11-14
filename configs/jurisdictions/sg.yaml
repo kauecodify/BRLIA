@@ -1,0 +1,14 @@
+jurisdiction: sg
+currency: SGD
+scale: 2
+payment_systems: [FAST, PayNow]
+identifiers: [UEN, NRIC]
+reporting: [MAS]
+regulatory_refs:
+  - "PS Act 2019"
+  - "MAS Notice 626"
+data_residency: sg
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: endToEndId

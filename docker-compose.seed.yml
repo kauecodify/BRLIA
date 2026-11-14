@@ -1,0 +1,18 @@
+services:
+  postgres-seed:
+    image: postgres:16-alpine
+    environment: [POSTGRES_DB=brlia, POSTGRES_USER=brlia]
+    volumes:
+      - pgseed:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - ./seed:/seed:ro
+    ports: ["5433:5432"]
+
+  seed-applier:
+    image: python:3.12-slim
+    depends_on: [postgres-seed]
+    volumes: [./seed:/seed:ro, ./scripts:/scripts:ro]
+    command: ["bash", "/scripts/apply-seed.sh"]
+
+volumes:
+  pgseed:

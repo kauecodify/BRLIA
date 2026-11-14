@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: brlia-agent
+  namespace: brlia-edge
+spec:
+  selector:
+    matchLabels:
+      app: brlia-agent
+  template:
+    metadata:
+      labels:
+        app: brlia-agent
+    spec:
+      hostNetwork: false
+      containers:
+        - name: brlia-agent
+          image: brlia/pool-engine:2.1.0
+          env:
+            - name: BRLIA_DEPLOY_MODE
+              value: daemonset
+            - name: BRLIA_POOL_TICK_MS
+              value: "1"
+            - name: BRLIA_UDS_PATH
+              value: /var/run/brlia/pool.sock
+          volumeMounts:
+            - name: brlia-run
+              mountPath: /var/run/brlia
+      volumes:
+        - name: brlia-run
+          hostPath:
+            path: /var/run/brlia
+            type: DirectoryOrCreate

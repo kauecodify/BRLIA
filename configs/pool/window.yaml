@@ -1,0 +1,8 @@
+window:
+  tick_ms: 1
+  clock: CLOCK_MONOTONIC_RAW
+  wall_clock_for_ordering: false
+  watermark_ms: 5
+  max_ops_per_window: 4096
+  pool_key_fields: [jurisdiction, functional_currency, monotonic_window, sequence]
+  close_policy: tick-or-watermark
