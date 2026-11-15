@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.1",
+  "correlation_id": "seed-genesis-0000000000000001",
+  "amount_minor": 10000000000,
+  "currency": "BRL",
+  "scale": 2,
+  "nature": "capital",
+  "immutable": true,
+  "entries": [
+    {
+      "account": "1.1.1.01",
+      "account_name": "Ativo Circulante - Caixa/Bancos",
+      "side": "D",
+      "amount_minor": 10000000000,
+      "currency": "BRL",
+      "scale": 2
+    },
+    {
+      "account": "2.1.1.01",
+      "account_name": "Patrimonio Liquido - Capital Social (AFAC)",
+      "side": "C",
+      "amount_minor": 10000000000,
+      "currency": "BRL",
+      "scale": 2
+    }
+  ],
+  "constraints": {
+    "no_update": true,
+    "no_delete": true,
+    "pool_mutation": "forbidden",
+    "audit": "worm-hash-chain"
+  }
+}

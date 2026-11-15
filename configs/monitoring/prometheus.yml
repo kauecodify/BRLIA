@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: pool-engine-control
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["pool-engine:9100"]
+  - job_name: host-adapter
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host-adapter:9101"]
+  - job_name: control-plane
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "routing-engine:8000"
+          - "transaction-orchestrator:8000"
+          - "settlement-engine:8000"
+          - "ledger:8000"
+          - "treasury-service:8000"
+          - "audit-trail:8000"
+
+rule_files:
+  - /etc/prometheus/alerts.yml

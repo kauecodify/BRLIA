@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.1",
+  "rounds": [
+    {
+      "round": "pre-seed",
+      "amount_minor": 10000000000,
+      "currency": "BRL",
+      "scale": 2,
+      "instrument": "integralizacao-de-capital-afac",
+      "pre_money_minor": null,
+      "dilution": null,
+      "note": "sujeito a validacao do regulador e da assessoria"
+    }
+  ],
+  "holders": [
+    {
+      "holder": "socios-fundadores",
+      "share_class": "ordinaria",
+      "participation": null,
+      "note": "sujeito a validacao do regulador e da assessoria"
+    }
+  ]
+}

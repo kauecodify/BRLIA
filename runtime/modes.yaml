@@ -1,0 +1,31 @@
+modes:
+  sidecar:
+    surface: kubernetes-pod
+    transport: uds
+    ingress: none
+    image: brlia/pool-engine
+    notes: "container no mesmo pod do workload do cliente"
+  daemonset:
+    surface: k3s-edge-node
+    transport: uds
+    ingress: none
+    image: brlia/pool-engine
+    notes: "um agente por no; egress outbound-only"
+  standalone:
+    surface: systemd-bare-metal
+    transport: uds
+    ingress: none
+    image: brlia/pool-engine
+    notes: "servico brlia-agent.service em servidor proprio"
+  managed:
+    surface: aws-ecs|gcp-cloud-run|azure-container-apps
+    transport: grpc-mtls
+    ingress: none
+    image: brlia/pool-engine
+    notes: "sem UDS; gRPC com mTLS e SPIFFE obrigatorio"
+contract:
+  grpc: AdmitOperation, PoolClosed, Reconcile
+  invariants:
+    - mesma imagem
+    - mesmo binario
+    - mesmo contrato gRPC

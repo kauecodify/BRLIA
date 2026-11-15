@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-client
+spec:
+  template:
+    spec:
+      shareProcessNamespace: false
+      containers:
+        - name: brlia-pool-engine
+          image: brlia/pool-engine:2.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BRLIA_DEPLOY_MODE
+              value: sidecar
+            - name: BRLIA_POOL_TICK_MS
+              value: "1"
+            - name: BRLIA_UDS_PATH
+              value: /var/run/brlia/pool.sock
+          volumeMounts:
+            - name: brlia-sockets
+              mountPath: /var/run/brlia
+          resources:
+            limits:
+              cpu: "2"
+              memory: 512Mi
+      volumes:
+        - name: brlia-sockets
+          emptyDir:
+            medium: Memory

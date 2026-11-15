@@ -1,0 +1,16 @@
+jurisdiction: br
+currency: BRL
+scale: 2
+payment_systems: [PIX, SPB, STR]
+identifiers: [CPF, CNPJ]
+reporting: [BACEN, e-Financeira, SCR]
+regulatory_refs:
+  - "Res. BCB 80/2021"
+  - "Res. 4.658/2018"
+  - "PLD/FT Lei 9.613/1998"
+  - "LGPD Lei 13.709/2018"
+data_residency: br
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: endToEndId

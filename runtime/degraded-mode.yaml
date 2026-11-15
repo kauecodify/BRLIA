@@ -1,0 +1,17 @@
+degraded_mode:
+  trigger: control-plane-unreachable
+  wal:
+    enabled: true
+    max_buffer_seconds: 60
+    fsync: deferred
+    replay: idempotent
+  write_policy: fail-closed
+  write_error:
+    http_status: 503
+    code: POOL_DEGRADED
+  read_policy: fail-open
+  reattach:
+    replay: true
+    deduplication: idempotency-key
+    double_entry: forbidden
+    silent_loss: forbidden

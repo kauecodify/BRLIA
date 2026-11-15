@@ -1,0 +1,14 @@
+jurisdiction: uk
+currency: GBP
+scale: 2
+payment_systems: [FPS, CHAPS]
+identifiers: [IBAN, SortCode]
+reporting: [FCA]
+regulatory_refs:
+  - "PSRs 2017"
+  - "FCA SYSC"
+data_residency: uk
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: endToEndId

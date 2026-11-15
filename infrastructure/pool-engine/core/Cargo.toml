@@ -1,0 +1,18 @@
+[package]
+name = "brlia_pool_core"
+version = "2.1.0"
+edition = "2021"
+description = "Nucleo compilado do pool-engine BRLIA: ring MPMC lock-free, relogio monotonic, janela de 1 ms e netting multilateral"
+
+[lib]
+name = "brlia_pool_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+libc = "0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"

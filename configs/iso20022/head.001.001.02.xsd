@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Envelope de cabecalho BusinessApplicationHeader (head.001).
+     Em homologacao, substituir pelo XSD oficial ISO 20022 head.001.001.02. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="urn:iso:std:iso:20022:tech:xsd:head.001.001.02"
+           elementFormDefault="qualified">
+  <xs:element name="AppHdr" type="xs:anyType"/>
+</xs:schema>

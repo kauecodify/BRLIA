@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package brlia.pool.v1;
+
+// Contrato unico em todos os modos de deploy: sidecar, daemonset,
+// standalone e managed. UDS e o transporte preferencial; TCP com mTLS e
+// SPIFFE e o fallback.
+
+service PoolService {
+  rpc AdmitOperation(AdmitRequest) returns (AdmitResponse);
+  rpc PoolClosed(PoolClosedRequest) returns (PoolClosedResponse);
+  rpc Reconcile(ReconcileRequest) returns (ReconcileResponse);
+}
+
+message PoolKey {
+  string jurisdiction = 1;
+  string functional_currency = 2;
+  uint64 monotonic_window = 3;
+  uint64 sequence = 4;
+}
+
+message AdmitRequest {
+  string operation_id = 1;
+  string idempotency_key = 2;
+  PoolKey pool_key = 3;
+  string leg = 4;
+  int64 amount_minor = 5;
+  string currency = 6;
+  int32 scale = 7;
+  string account = 8;
+  string trace_id = 9;
+}
+
+message AdmitResponse {
+  bool admitted = 1;
+  string pool_id = 2;
+  string rejection_code = 3; // POOL_FULL ou POOL_DEGRADED
+  string retry_hint = 4;
+  string trace_id = 5;
+}
+
+message PoolClosedRequest {
+  string pool_id = 1;
+  PoolKey pool_key = 2;
+  string composition_hash = 3;
+}
+
+message PoolClosedResponse {
+  bool accepted = 1;
+  string trace_id = 2;
+}
+
+message ReconcileRequest {
+  string pool_id = 1;
+  string idempotency_key = 2;
+}
+
+message ReconcileResponse {
+  bool consistent = 1;
+  uint64 window_seq = 2;
+  string detail = 3;
+}

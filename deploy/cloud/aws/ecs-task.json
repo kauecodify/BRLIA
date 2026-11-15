@@ -1,0 +1,21 @@
+{
+  "family": "brlia-pool-engine",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "containerDefinitions": [
+    {
+      "name": "pool-engine",
+      "image": "brlia/pool-engine:2.1.0",
+      "environment": [
+        { "name": "BRLIA_DEPLOY_MODE", "value": "managed" },
+        { "name": "BRLIA_POOL_TICK_MS", "value": "1" },
+        { "name": "BRLIA_UDS_PATH", "value": "" },
+        { "name": "BRLIA_GRPC_TARGET", "value": "pool-controlplane.internal:443" },
+        { "name": "BRLIA_SPIFFE_ID", "value": "spiffe://brlia.local/aws/ecs/pool-engine" }
+      ],
+      "portMappings": []
+    }
+  ]
+}

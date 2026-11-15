@@ -1,0 +1,25 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: brlia-pool-engine
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cpu-throttling: "false"
+    spec:
+      containers:
+        - image: brlia/pool-engine:2.1.0
+          env:
+            - name: BRLIA_DEPLOY_MODE
+              value: managed
+            - name: BRLIA_POOL_TICK_MS
+              value: "1"
+            - name: BRLIA_GRPC_TARGET
+              value: pool-controlplane.internal:443
+            - name: BRLIA_SPIFFE_ID
+              value: spiffe://brlia.local/gcp/cloud-run/pool-engine
+          resources:
+            limits:
+              cpu: "2"
+              memory: 512Mi

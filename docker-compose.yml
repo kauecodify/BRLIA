@@ -1,0 +1,146 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: [all]
+    ports: ["5432:5432"]
+    environment: [POSTGRES_DB=brlia, POSTGRES_USER=brlia]
+    volumes: [pgdata:/var/lib/postgresql/data, ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro]
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    profiles: [all]
+    ports: ["9092:9092"]
+  redis:
+    image: redis:7-alpine
+    profiles: [all]
+    ports: ["6379:6379"]
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    profiles: [all]
+    ports: ["9090:9090"]
+    volumes: [./configs/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro, ./configs/monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro]
+  grafana:
+    image: grafana/grafana:11.2.0
+    profiles: [all]
+    ports: ["3000:3000"]
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    profiles: [all]
+    ports: ["4317:4317"]
+    volumes: [./configs/opentelemetry/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro]
+  nginx:
+    image: nginx:1.27-alpine
+    profiles: [all]
+    ports: ["8080:8080"]
+    volumes: [./configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro]
+  routing-engine:
+    image: brlia/routing-engine:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  transaction-orchestrator:
+    image: brlia/transaction-orchestrator:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  settlement-engine:
+    image: brlia/settlement-engine:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  ledger:
+    image: brlia/ledger:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  multi-currency-ledger:
+    image: brlia/multi-currency-ledger:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  fx-engine:
+    image: brlia/fx-engine:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  jurisdiction-engine:
+    image: brlia/jurisdiction-engine:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  treasury-service:
+    image: brlia/treasury-service:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  risk-engine:
+    image: brlia/risk-engine:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  compliance-screening:
+    image: brlia/compliance-screening:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  escrow-manager:
+    image: brlia/escrow-manager:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  auth-service:
+    image: brlia/auth-service:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  notification-service:
+    image: brlia/notification-service:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  file-processor:
+    image: brlia/file-processor:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  audit-trail:
+    image: brlia/audit-trail:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  reporting-regulatorio:
+    image: brlia/reporting-regulatorio:2.1.0
+    profiles: [all]
+    ports: ["8000:8000"]
+  pool-engine:
+    image: brlia/pool-engine:2.1.0
+    profiles: [colocated]
+    environment: [BRLIA_DEPLOY_MODE=sidecar, BRLIA_POOL_TICK_MS=1, BRLIA_UDS_PATH=/var/run/brlia/pool.sock]
+    volumes: [brlia-run:/var/run/brlia]
+  host-adapter:
+    image: brlia/host-adapter:2.1.0
+    profiles: [colocated]
+    environment: [BRLIA_DEPLOY_MODE=sidecar, BRLIA_UDS_PATH=/var/run/brlia/pool.sock]
+    volumes: [brlia-run:/var/run/brlia]
+    network_mode: none
+  pix-simulator:
+    image: brlia/pix-simulator:2.1.0
+    profiles: [br]
+    ports: ["8000:8000"]
+  bacen-reporting-worker:
+    image: brlia/reporting-regulatorio:2.1.0
+    profiles: [br]
+  dict-cache:
+    image: redis:7-alpine
+    profiles: [br]
+    ports: ["6379:6379"]
+  swift-gateway:
+    image: brlia/swift-gateway:2.1.0
+    profiles: [intl]
+    ports: ["8000:8000"]
+  sepa-adapter:
+    image: brlia/sepa-adapter:2.1.0
+    profiles: [intl]
+    ports: ["8000:8000"]
+  fedwire-adapter:
+    image: brlia/fedwire-adapter:2.1.0
+    profiles: [intl]
+    ports: ["8000:8000"]
+  fps-adapter:
+    image: brlia/fps-adapter:2.1.0
+    profiles: [intl]
+    ports: ["8000:8000"]
+  paynow-adapter:
+    image: brlia/paynow-adapter:2.1.0
+    profiles: [intl]
+    ports: ["8000:8000"]
+  ofac-screening-worker:
+    image: brlia/compliance-screening:2.1.0
+    profiles: [intl]
+volumes:
+  pgdata:
+  brlia-run:

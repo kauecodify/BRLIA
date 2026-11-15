@@ -1,0 +1,15 @@
+schema_version: "2.1"
+liquidity_ceiling_minor: 10000000000
+liquidity_ceiling_readonly: true
+currency: BRL
+scale: 2
+policy:
+  - id: ceiling-reference
+    rule: "liquidity_ceiling_minor e teto de referencia do pool-engine; nunca debita genesis"
+  - id: capital-protection
+    rule: "nenhum lancamento com pool_id debita Capital Social (2.1.1.01)"
+  - id: minimum-capital
+    rule: "capital minimo por jurisdicao em configs/jurisdictions; sujeito a validacao do regulador e da assessoria"
+exposure_limits:
+  per_counterparty_minor: 500000000
+  per_jurisdiction_minor: 2000000000

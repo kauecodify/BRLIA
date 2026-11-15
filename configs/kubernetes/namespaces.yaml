@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: brlia-br
+  labels:
+    jurisdiction: br
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: brlia-intl
+  labels:
+    jurisdiction: intl
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: brlia-edge
+  labels:
+    jurisdiction: edge
+    deploy-mode: daemonset

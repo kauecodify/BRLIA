@@ -1,0 +1,14 @@
+jurisdiction: global
+currency: MULTI
+scale: 2
+payment_systems: [SWIFT_gpi]
+identifiers: [IBAN, LEI, BIC]
+reporting: [CRS, FATCA]
+regulatory_refs:
+  - "FATF R.16"
+  - "Travel Rule"
+data_residency: per-counterparty-agreement
+minimum_capital_minor: 1000000000
+pool:
+  netting_group: [jurisdiction, currency, window]
+  idempotency_field: uetr

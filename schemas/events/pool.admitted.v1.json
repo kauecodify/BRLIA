@@ -1,0 +1,29 @@
+{
+  "schema_version": "pool.admitted.v1",
+  "title": "PoolAdmitted",
+  "description": "Emitido por operacao admitida na janela; nao substitui o pool.closed.v1.",
+  "type": "object",
+  "required": ["event_id", "event_type", "pool_id", "pool_key", "operation_id", "idempotency_key"],
+  "properties": {
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "type": "string", "const": "pool.admitted.v1" },
+    "pool_id": { "type": "string" },
+    "pool_key": {
+      "type": "object",
+      "required": ["jurisdiction", "functional_currency", "monotonic_window", "sequence"],
+      "properties": {
+        "jurisdiction": { "type": "string" },
+        "functional_currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "monotonic_window": { "type": "integer", "minimum": 0 },
+        "sequence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "operation_id": { "type": "string" },
+    "idempotency_key": { "type": "string", "minLength": 1 },
+    "leg": { "type": "string", "enum": ["pix", "fx", "escrow", "ledger"] },
+    "amount_minor": { "type": "integer", "minimum": 0 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "scale": { "type": "integer", "const": 2 },
+    "trace_id": { "type": "string" }
+  }
+}

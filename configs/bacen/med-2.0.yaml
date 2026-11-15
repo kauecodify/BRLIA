@@ -1,0 +1,14 @@
+med:
+  version: "2.0"
+  scope: pix
+  signals:
+    - id: velocity
+      threshold_per_minute: 30
+    - id: amount_anomaly
+      reference: historical_profile
+    - id: dict_key_mismatch
+      action: hold
+  idempotency:
+    field: endToEndId
+  integration:
+    source: outbox

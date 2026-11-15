@@ -1,0 +1,47 @@
+groups:
+  - name: pool-slo
+    rules:
+      - alert: PoolCloseP99Breach
+        expr: histogram_quantile(0.99, sum(rate(pool_close_latency_seconds_bucket[5m])) by (le)) > 0.005
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "p99 de close+netting acima do limite configurado de 5ms"
+      - alert: PoolAdmitP99Breach
+        expr: histogram_quantile(0.99, sum(rate(pool_admit_latency_seconds_bucket[5m])) by (le)) > 0.001
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p99 de admit acima do limite configurado de 1ms"
+      - alert: PoolBackpressure
+        expr: increase(pool_rejected_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "rejeicoes POOL_FULL detectadas; retry com a mesma idempotency-key"
+      - alert: WindowDrift
+        expr: rate(pool_window_ops[5m]) < 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vazao de janelas abaixo do esperado; verificar CLOCK_MONOTONIC_RAW"
+  - name: capital
+    rules:
+      - alert: MinimumCapitalBreach
+        expr: treasury_liquidity_available_minor < treasury_minimum_capital_minor
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "liquidez disponivel abaixo do capital minimo configurado"
+      - alert: GenesisIntegrity
+        expr: audit_genesis_hash_mismatch_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "hash do genesis divergiu do WORM"

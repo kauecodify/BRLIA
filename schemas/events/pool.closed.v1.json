@@ -1,0 +1,54 @@
+{
+  "schema_version": "pool.closed.v1",
+  "title": "PoolClosed",
+  "description": "Unico evento por janela de 1 ms, entregue ao outbox apos netting multilateral.",
+  "type": "object",
+  "required": ["event_id", "event_type", "pool_id", "pool_key", "window_seq", "netting", "composition_hash"],
+  "properties": {
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "type": "string", "const": "pool.closed.v1" },
+    "pool_id": { "type": "string", "minLength": 1 },
+    "pool_key": {
+      "type": "object",
+      "required": ["jurisdiction", "functional_currency", "monotonic_window", "sequence"],
+      "properties": {
+        "jurisdiction": { "type": "string", "enum": ["br", "us", "eu", "uk", "sg", "global"] },
+        "functional_currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "monotonic_window": { "type": "integer", "minimum": 0 },
+        "sequence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "window_seq": { "type": "integer", "minimum": 0 },
+    "clock": { "type": "string", "const": "CLOCK_MONOTONIC_RAW" },
+    "admitted_ops": { "type": "integer", "minimum": 0 },
+    "netting": {
+      "type": "object",
+      "required": ["liquid_entries"],
+      "properties": {
+        "liquid_entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entry_id", "idempotency_key", "account", "side", "amount_minor", "currency", "scale", "origin_trail"],
+            "properties": {
+              "entry_id": { "type": "string" },
+              "idempotency_key": { "type": "string", "minLength": 1 },
+              "account": { "type": "string" },
+              "side": { "type": "string", "enum": ["D", "C"] },
+              "amount_minor": { "type": "integer", "minimum": 0 },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+              "scale": { "type": "integer", "const": 2 },
+              "nature": { "type": "string", "const": "compensacao" },
+              "origin_trail": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "admitted_count": { "type": "integer", "minimum": 0 },
+        "liquid_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "liquidity_ceiling_minor": { "type": "integer", "minimum": 0 },
+    "composition_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "trace_id": { "type": "string" }
+  }
+}
