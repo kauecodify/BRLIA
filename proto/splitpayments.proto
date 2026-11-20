@@ -1,0 +1,333 @@
+syntax = "proto3";
+
+package brlia.splitpayments.v1;
+
+option go_package = "./proto/gen/go;brlia/splitpayments/v1";
+option java_package = "br.com.brlia.splitpayments.v1";
+option java_outer_classname = "SplitPaymentsProto";
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+// Currency types
+enum Currency {
+    CURRENCY_UNSPECIFIED = 0;
+    CURRENCY_BRL = 1;
+    CURRENCY_USD = 2;
+    CURRENCY_EUR = 3;
+}
+
+// Account types
+enum AccountType {
+    ACCOUNT_TYPE_UNSPECIFIED = 0;
+    ACCOUNT_TYPE_ESCROW = 1;
+    ACCOUNT_TYPE_BANK = 2;
+    ACCOUNT_TYPE_WALLET = 3;
+    ACCOUNT_TYPE_PIX = 4;
+    ACCOUNT_TYPE_CRYPTO = 5;
+}
+
+// Transaction status
+enum SplitStatus {
+    SPLIT_STATUS_UNSPECIFIED = 0;
+    SPLIT_STATUS_PENDING = 1;
+    SPLIT_STATUS_PROCESSING = 2;
+    SPLIT_STATUS_TAX_CONSULTED = 3;
+    SPLIT_STATUS_SPLIT_CALCULATED = 4;
+    SPLIT_STATUS_GATEWAY_SUBMITTED = 5;
+    SPLIT_STATUS_GATEWAY_PROCESSING = 6;
+    SPLIT_STATUS_COMPLETED = 7;
+    SPLIT_STATUS_FAILED = 8;
+    SPLIT_STATUS_ESCROW_RETAINED = 9;
+    SPLIT_STATUS_CANCELLED = 10;
+    SPLIT_STATUS_REVERSED = 11;
+}
+
+// Payment method
+enum PaymentMethod {
+    PAYMENT_METHOD_UNSPECIFIED = 0;
+    PAYMENT_METHOD_PIX = 1;
+    PAYMENT_METHOD_BOLETO = 2;
+    PAYMENT_METHOD_TED = 3;
+    PAYMENT_METHOD_DOC = 4;
+    PAYMENT_METHOD_CREDIT_CARD = 5;
+    PAYMENT_METHOD_DEBIT_CARD = 6;
+}
+
+// Transaction type
+enum TransactionType {
+    TRANSACTION_TYPE_UNSPECIFIED = 0;
+    TRANSACTION_TYPE_PAYMENT = 1;
+    TRANSACTION_TYPE_REFUND = 2;
+    TRANSACTION_TYPE_CHARGEBACK = 3;
+    TRANSACTION_TYPE_ADJUSTMENT = 4;
+}
+
+// ============================================================================
+// Messages
+// ============================================================================
+
+// Bank account information
+message BankAccount {
+    string bank_code = 1;          // Bank code (e.g., "104" for Caixa)
+    string agency = 2;             // Agency number
+    string account_number = 3;     // Account number
+    string account_digit = 4;      // Account digit (optional)
+    string document_number = 5;    // CPF or CNPJ
+    string document_type = 6;      // "CPF" or "CNPJ"
+    string holder_name = 7;        // Account holder name
+}
+
+// PIX account information
+message PIXAccount {
+    string key_type = 1;          // "CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"
+    string key_value = 2;         // PIX key value
+    string holder_name = 3;        // Account holder name
+    string document_number = 4;    // Document number (CPF/CNPJ)
+}
+
+// Destination account (can be bank, PIX, escrow, etc.)
+message DestinationAccount {
+    AccountType account_type = 1;
+    BankAccount bank_account = 2;
+    PIXAccount pix_account = 3;
+    string external_id = 4;        // External ID for the account
+    map<string, string> metadata = 5;  // Additional metadata
+}
+
+// Split rule definition
+message SplitRule {
+    string description = 1;        // Rule description
+    double percentage = 2;         // Percentage (0.01 = 1%)
+    DestinationAccount destination = 3;  // Destination account
+    map<string, string> metadata = 4;  // Additional metadata
+}
+
+// Tax information
+message TaxInfo {
+    double cbs_rate = 1;           // CBS tax rate
+    uint64 cbs_amount = 2;         // CBS tax amount in minor units
+    string cbs_account_id = 3;     // CBS destination account ID
+    
+    double ibs_rate = 4;           // IBS tax rate
+    uint64 ibs_amount = 5;         // IBS tax amount in minor units
+    string ibs_account_id = 6;     // IBS destination account ID
+    
+    double total_tax_rate = 7;     // Total tax rate
+    uint64 total_tax_amount = 8;   // Total tax amount in minor units
+}
+
+// Split amounts
+message SplitAmounts {
+    DestinationAccount supplier = 1;
+    uint64 supplier_amount = 2;
+    
+    DestinationAccount platform_fee = 3;
+    uint64 platform_fee_amount = 4;
+    
+    DestinationAccount buyer_reserve = 5;
+    uint64 buyer_reserve_amount = 6;
+    
+    DestinationAccount lender_cost = 7;
+    uint64 lender_cost_amount = 8;
+}
+
+// Gateway information
+message GatewayInfo {
+    string gateway = 1;            // Gateway name (e.g., "BACEN", "IUGU")
+    string transaction_id = 2;     // Gateway transaction ID
+    string status = 3;            // Gateway status
+    map<string, string> metadata = 4;  // Additional gateway metadata
+}
+
+// Escrow information
+message EscrowInfo {
+    string escrow_account_id = 1; // Escrow account ID
+    uint64 amount_minor = 2;      // Amount in escrow (minor units)
+    string reason = 3;            // Reason for escrow retention
+    uint64 retry_in_seconds = 4;  // Seconds until next retry
+    map<string, string> metadata = 5;
+}
+
+// Error information
+message ErrorInfo {
+    string code = 1;              // Error code
+    string message = 2;           // Error message
+    map<string, string> details = 3;  // Error details
+}
+
+// ============================================================================
+// Request Messages
+// ============================================================================
+
+// Request to create a split transaction
+message CreateSplitRequest {
+    string idempotency_key = 1;          // Idempotency key (required)
+    string transaction_id = 2;           // BRLIA transaction ID
+    string pool_id = 3;                  // Pool ID (e.g., "br-BRL-000000000001-0001")
+    uint64 amount_minor = 4;            // Amount in minor units (e.g., R$ 100.00 = 10000)
+    Currency currency = 5;              // Currency (default: BRL)
+    string reference_id = 6;            // External reference ID (e.g., invoice number)
+    
+    // Destination accounts
+    DestinationAccount supplier_account = 7;
+    DestinationAccount platform_fee_account = 8;
+    DestinationAccount buyer_reserve_account = 9;
+    DestinationAccount lender_cost_account = 10;
+    
+    // Optional: Custom split rules (if not using defaults)
+    repeated SplitRule split_rules = 11;
+    
+    // Optional: Tax information (if known)
+    TaxInfo tax_info = 12;
+    
+    // Metadata
+    map<string, string> metadata = 13;
+}
+
+// Request to get split status
+message GetSplitStatusRequest {
+    string split_id = 1;                 // Split transaction ID
+    string transaction_id = 2;           // BRLIA transaction ID (alternative)
+}
+
+// Request to list splits by transaction
+message ListSplitsRequest {
+    string transaction_id = 1;           // BRLIA transaction ID
+    string pool_id = 2;                  // Pool ID (optional)
+    SplitStatus status = 3;              // Filter by status (optional)
+    uint64 limit = 4;                    // Maximum number of results
+    string page_token = 5;               // Pagination token
+}
+
+// Request to cancel a split
+message CancelSplitRequest {
+    string split_id = 1;                 // Split transaction ID
+    string reason = 2;                   // Reason for cancellation
+    map<string, string> metadata = 3;
+}
+
+// ============================================================================
+// Response Messages
+// ============================================================================
+
+// Response for create split
+message CreateSplitResponse {
+    string split_id = 1;                 // Split transaction ID
+    string transaction_id = 2;           // BRLIA transaction ID
+    SplitStatus status = 3;              // Current status
+    string split_hash = 4;               // Unique hash for idempotency
+    uint64 processed_at = 5;             // Timestamp in nanoseconds
+    
+    // Calculated amounts
+    SplitAmounts split_amounts = 6;
+    TaxInfo tax_info = 7;
+    
+    // Gateway information
+    GatewayInfo gateway_info = 8;
+    
+    // Escrow information (if applicable)
+    EscrowInfo escrow_info = 9;
+    
+    // Error information (if failed)
+    ErrorInfo error_info = 10;
+    
+    // Metadata
+    map<string, string> metadata = 11;
+}
+
+// Response for get split status
+message GetSplitStatusResponse {
+    string split_id = 1;
+    string transaction_id = 2;
+    SplitStatus status = 3;
+    uint64 amount_minor = 4;
+    Currency currency = 5;
+    SplitAmounts split_amounts = 6;
+    TaxInfo tax_info = 7;
+    GatewayInfo gateway_info = 8;
+    EscrowInfo escrow_info = 9;
+    ErrorInfo error_info = 10;
+    uint64 created_at = 11;
+    uint64 updated_at = 12;
+    map<string, string> metadata = 13;
+}
+
+// Response for list splits
+message ListSplitsResponse {
+    repeated GetSplitStatusResponse splits = 1;
+    string next_page_token = 2;
+    uint64 total_count = 3;
+}
+
+// Response for cancel split
+message CancelSplitResponse {
+    string split_id = 1;
+    string transaction_id = 2;
+    SplitStatus status = 3;
+    uint64 cancelled_at = 4;
+    string reason = 5;
+    map<string, string> metadata = 6;
+}
+
+// ============================================================================
+// Webhook Messages
+// ============================================================================
+
+// Webhook event from splitpayments
+message SplitWebhookEvent {
+    string event_id = 1;                 // Unique event ID
+    string split_id = 2;                  // Split transaction ID
+    string transaction_id = 3;           // BRLIA transaction ID
+    string event_type = 4;               // Event type (see SplitEventType enum)
+    SplitStatus status = 5;              // Current status
+    uint64 timestamp = 6;                // Event timestamp in nanoseconds
+    bytes payload = 7;                   // Event payload (JSON encoded)
+    string signature = 8;                // Event signature for verification
+    map<string, string> metadata = 9;
+}
+
+// Event types for webhooks
+enum SplitEventType {
+    SPLIT_EVENT_UNSPECIFIED = 0;
+    SPLIT_INITIATED = 1;
+    SPLIT_COMPLETED = 2;
+    SPLIT_FAILED = 3;
+    SPLIT_ESCROW_RETAINED = 4;
+    SPLIT_REVERSED = 5;
+    SPLIT_CANCELLED = 6;
+}
+
+// ============================================================================
+// Service Definition
+// ============================================================================
+
+service SplitPaymentsService {
+    // Create a new split transaction
+    rpc CreateSplit(CreateSplitRequest) returns (CreateSplitResponse);
+    
+    // Get the status of a split transaction
+    rpc GetSplitStatus(GetSplitStatusRequest) returns (GetSplitStatusResponse);
+    
+    // List splits by transaction
+    rpc ListSplits(ListSplitsRequest) returns (ListSplitsResponse);
+    
+    // Cancel a split transaction (only if PENDING)
+    rpc CancelSplit(CancelSplitRequest) returns (CancelSplitResponse);
+    
+    // Health check
+    rpc HealthCheck(stream HealthCheckRequest) returns (stream HealthCheckResponse);
+}
+
+// Health check messages
+message HealthCheckRequest {
+    bool verbose = 1;
+}
+
+message HealthCheckResponse {
+    string status = 1;
+    string version = 2;
+    uint64 timestamp = 3;
+    map<string, string> details = 4;
+}

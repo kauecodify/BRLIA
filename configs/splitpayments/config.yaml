@@ -1,0 +1,392 @@
+# SplitPayments Configuration for BRLIA V2
+# This configuration defines the integration with LowDataESC splitpayments service
+
+# ============================================================================
+# Service Configuration
+# ============================================================================
+splitpayments:
+  # Service endpoints
+  endpoints:
+    grpc:
+      host: "splitpayments.lowdataesc.gov.br"
+      port: 50053
+      
+    rest:
+      base_url: "https://splitpayments.lowdataesc.gov.br/api/v1/split"
+      
+  # Timeout configurations (in milliseconds)
+  timeouts:
+    grpc: 500       # gRPC call timeout
+    rest: 500       # REST call timeout
+    webhook: 10000  # Webhook processing timeout
+    
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    initial_delay: 100   # ms
+    max_delay: 1000      # ms
+    backoff_multiplier: 2.0
+    retryable_errors:
+      - "DEADLINE_EXCEEDED"
+      - "UNAVAILABLE"
+      - "RESOURCE_EXHAUSTED"
+      - "ABORTED"
+      - "GATEWAY_TIMEOUT"
+      - "GATEWAY_UNAVAILABLE"
+      - "ESCROW_RETAINED"
+
+# ============================================================================
+# gRPC Configuration
+# ============================================================================
+grpc:
+  # TLS/mTLS configuration
+  tls:
+    enabled: true
+    
+    # Client certificate configuration
+    client:
+      cert_path: "/certs/client.crt"
+      key_path: "/certs/client.key"
+      
+    # CA certificate for server validation
+    ca_path: "/certs/ca.crt"
+    
+    # Server name for SNI
+    server_name: "splitpayments.lowdataesc.gov.br"
+    
+  # Connection pool configuration
+  connection:
+    max_connections: 100
+    idle_timeout: 30000  # 30 seconds
+    keepalive: true
+    keepalive_interval: 60000  # 60 seconds
+
+# ============================================================================
+# REST API Configuration
+# ============================================================================
+rest:
+  # Authentication
+  authentication:
+    api_key: "${SPLITPAYMENTS_API_KEY}"
+    bearer_token: "${SPLITPAYMENTS_BEARER_TOKEN}"
+    
+  # Headers
+  default_headers:
+    Content-Type: "application/json"
+    Accept: "application/json"
+    X-Consortium-Id: "${CONSORTIUM_ID}"
+    X-Request-Source: "BRLIA_V2"
+    X-API-Version: "v1"
+
+# ============================================================================
+# Webhook Configuration
+# ============================================================================
+webhook:
+  # BRLIA webhook endpoint for splitpayments
+  endpoint: "https://api.brlia.com/v2/webhooks/splitpayments"
+  
+  # Secret for webhook signature verification
+  secret: "${SPLITPAYMENTS_WEBHOOK_SECRET}"
+  
+  # Events to subscribe to
+  subscribed_events:
+    - "SPLIT_INITIATED"
+    - "SPLIT_COMPLETED"
+    - "SPLIT_FAILED"
+    - "SPLIT_ESCROW_RETAINED"
+    - "SPLIT_REVERSED"
+    - "SPLIT_CANCELLED"
+  
+  # Webhook processing
+  processing:
+    max_concurrent: 100
+    queue_size: 1000
+    retry_attempts: 5
+    retry_delay: 1000  # ms
+
+# ============================================================================
+# Split Configuration
+# ============================================================================
+split:
+  # Default split rules (can be overridden per transaction)
+  default_rules:
+    platform_fee:
+      percentage: 0.01      # 1%
+      account_type: "BANK"
+      external_id: "BRLIA_MAIN_ESCROW"
+      
+    buyer_reserve:
+      percentage: 0.02      # 2%
+      account_type: "ESCROW"
+      external_id: "BUYER_RESERVE_POOL"
+      
+    lender_cost:
+      percentage: 0.03      # 3%
+      account_type: "BANK"
+      external_id: "LENDER_COST_ACCOUNT"
+      
+    supplier_net:
+      percentage: 0.94      # 94%
+      account_type: "PIX"
+      external_id: "SUPPLIER_ACCOUNT"
+  
+  # Validate that percentages sum to 1.0
+  validate_percentages: true
+  
+  # Allow custom split rules
+  allow_custom_rules: true
+
+# ============================================================================
+# Account Configuration
+# ============================================================================
+accounts:
+  # BRLIA accounts
+  brlia:
+    fee_account:
+      account_type: "BANK"
+      bank_code: "104"
+      agency: "0001"
+      account_number: "12345678"
+      account_digit: "0"
+      document_number: "00000000000100"
+      document_type: "CNPJ"
+      holder_name: "BRLIA OPERACOES FINANCEIRAS"
+      
+    escrow_account:
+      account_type: "ESCROW"
+      external_id: "BRLIA_MAIN_ESCROW"
+      
+  # Buyer reserve pool
+  buyer_reserve:
+    account_type: "ESCROW"
+    external_id: "BUYER_RESERVE_POOL"
+    
+  # Lender accounts
+  lender:
+    cost_account:
+      account_type: "BANK"
+      bank_code: "001"
+      agency: "0001"
+      account_number: "99999999"
+      document_number: "00000000000101"
+      document_type: "CNPJ"
+      holder_name: "LENDER BANK S.A."
+      external_id: "LENDER_COST_ACCOUNT"
+
+# ============================================================================
+# Gateway Configuration
+# ============================================================================
+gateways:
+  # Priority order for gateway selection
+  priority:
+    - "BACEN_SPLIT_API"
+    - "IUGU"
+    - "ASAAS"
+    - "EFI"
+  
+  # Gateway-specific configurations
+  bacen:
+    enabled: true
+    api_key: "${BACEN_API_KEY}"
+    timeout: 2000  # ms
+    
+  iugu:
+    enabled: true
+    api_key: "${IUGU_API_KEY}"
+    account_id: "${IUGU_ACCOUNT_ID}"
+    timeout: 2000
+    
+  asaas:
+    enabled: true
+    api_key: "${ASAAS_API_KEY}"
+    timeout: 2000
+    
+  efi:
+    enabled: true
+    client_id: "${EFI_CLIENT_ID}"
+    client_secret: "${EFI_CLIENT_SECRET}"
+    timeout: 2000
+
+# ============================================================================
+# Escrow Configuration
+# ============================================================================
+escrow:
+  # Enable escrow fallback
+  enabled: true
+  
+  # Escrow account for fallback
+  fallback_account:
+    account_type: "ESCROW"
+    external_id: "ESCROW_BRLIA_FALLBACK"
+    
+  # Retry configuration for escrow
+  retry:
+    max_attempts: 5
+    initial_delay: 300    # 5 minutes
+    max_delay: 86400      # 24 hours
+    backoff_multiplier: 2.0
+    
+  # Notification for escrow
+  notification:
+    enabled: true
+    email: "escrow@brlia.com"
+    slack_channel: "#escrow-alerts"
+
+# ============================================================================
+# Monitoring Configuration
+# ============================================================================
+monitoring:
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+    
+  # Health checks
+  health:
+    liveness:
+      enabled: true
+      path: "/health/live"
+      port: 8080
+      
+    readiness:
+      enabled: true
+      path: "/health/ready"
+      port: 8080
+      
+    metrics:
+      enabled: true
+      path: "/health/metrics"
+      port: 8080
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  
+  # Log fields to include
+  fields:
+    request_id: true
+    correlation_id: true
+    user_id: true
+    session_id: true
+    
+  # Log sampling
+  sampling:
+    enabled: false
+    rate: 0.1
+
+# ============================================================================
+# Circuit Breaker Configuration
+# ============================================================================
+circuit_breaker:
+  enabled: true
+  
+  # Settings per service
+  splitpayments:
+    failure_threshold: 5
+    recovery_timeout: 30000  # 30 seconds
+    half_open_max_calls: 3
+    
+  gateway:
+    failure_threshold: 3
+    recovery_timeout: 60000  # 60 seconds
+    half_open_max_calls: 2
+
+# ============================================================================
+# Rate Limiting Configuration
+# ============================================================================
+rate_limiting:
+  enabled: true
+  
+  # Global rate limits
+  global:
+    requests_per_minute: 1000
+    burst_size: 100
+    
+  # Per-endpoint rate limits
+  endpoints:
+    "/api/v1/split/transactions":
+      requests_per_second: 100
+      burst_size: 50
+      
+    "/api/v1/split/webhook":
+      requests_per_second: 1000
+      burst_size: 100
+
+# ============================================================================
+# Security Configuration
+# ============================================================================
+security:
+  # mTLS configuration
+  mtls:
+    enabled: true
+    cert_path: "/certs/server.crt"
+    key_path: "/certs/server.key"
+    ca_path: "/certs/ca.crt"
+    
+  # CORS configuration
+  cors:
+    enabled: true
+    allowed_origins:
+      - "https://brlia.com"
+      - "https://staging.brlia.com"
+      - "https://api.brlia.com"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "Idempotency-Key"
+      - "X-Consortium-Id"
+      - "X-Request-Id"
+    max_age: 86400
+
+# ============================================================================
+# Environment-Specific Configuration
+# ============================================================================
+environment:
+  # Current environment
+  name: "${ENVIRONMENT:-development}"
+  
+  # Environment-specific settings
+  development:
+    splitpayments:
+      endpoints:
+        grpc:
+          host: "localhost"
+          port: 50053
+        rest:
+          base_url: "http://localhost:8080/api/v1/split"
+    logging:
+      level: "debug"
+    
+  staging:
+    splitpayments:
+      endpoints:
+        grpc:
+          host: "staging.splitpayments.lowdataesc.gov.br"
+          port: 50053
+        rest:
+          base_url: "https://staging.splitpayments.lowdataesc.gov.br/api/v1/split"
+    logging:
+      level: "info"
+    
+  production:
+    splitpayments:
+      endpoints:
+        grpc:
+          host: "splitpayments.lowdataesc.gov.br"
+          port: 50053
+        rest:
+          base_url: "https://splitpayments.lowdataesc.gov.br/api/v1/split"
+    logging:
+      level: "info"
